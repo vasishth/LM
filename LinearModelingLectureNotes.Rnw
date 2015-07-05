@@ -2959,128 +2959,248 @@ In linear modeling, we model the mean of a response $Y_1,\dots,Y_n$ as a functio
 
 Linear mixed models are useful for correlated data where $\mathbf{Y}\mid \mathbf{X}, \mathbf{\beta}$ are not independently distributed. 
 
-\subsection{Basic specification of the linear mixed model}
+\subsection{Informal presentation of LMMs}
 
-\begin{equation}
-\explain{Y_i}{n\times 1} = \explain{X_i}{n\times p}~~\explain{\beta}{p\times 1} + \explain{Z_i}{n\times q}~~\explain{b_i}{q\times 1} + \explain{\epsilon_i}{n\times 1}
+Consider the following fake data set, taken from a textbook (Maxwell and Delaney, p.\ 497):
+
+<<loadnoisedeg>>=
+noisedeg<-read.table("datacode/noisedeg.txt")
+@
+
+This is a $2\times 2$ factorial design, where each subject sees a stimulus in a no noise and noise condition; the stimulus is either angled at 0 degrees or 8 degrees. The dependent variable is reaction time (in msecs).
+
+One important point here, which was also true in the Hindi data, is that different subjects have different effects of noise and deg. In the linear models we fit earlier we ignored this.
+
+<<print=TRUE>>=
+## returning to our noise data (noisedeg):
+## here's an important fact about our data:
+# different subjects have different means for no.noise and noise
+# and different means for the three levels of deg
+
+t(means.noise<-with(noisedeg,tapply(rt,list(subj,noise),mean)))
+
+t(means.deg<-with(noisedeg,tapply(rt,list(subj,deg),mean)))
+@
+
+We can view the differential behavior of subjects in a graph (Figures~\ref{fig:noisebysubj} and \ref{fig:degbysubj}).
+
+\begin{figure}[!htbp]
+\centering
+<<fig=TRUE>>=
+## We can visualize these differences graphically:
+
+library(lattice)
+
+## noise by subject (data points):
+print(xyplot(rt~noise|subj,
+        panel=function(x,y,...){panel.xyplot(x,y,type="r")},noisedeg))
+@
+\caption{Noise effects by subject.}
+\label{fig:noisebysubj}
+\end{figure}
+
+
+
+\begin{figure}[!htbp]
+\centering
+<<fig=TRUE>>=
+## same as above, but for deg:
+print(xyplot(rt~deg|subj,
+        panel=function(x,y,...){panel.xyplot(x,y,type="r")},noisedeg))
+@
+\caption{Degree effects by subject.}
+\label{fig:degbysubj}
+\end{figure}
+
+Given these differences between subjects, you could fit a separate linear model for each subject, collect together the intercepts and slopes for each subject, and then check if the intercepts and slopes are significantly different from zero.
+
+Try this for one subject (s1):
+
+<<>>=
+## fit a separate linear model for subject s1:
+s1data<-subset(noisedeg,subj=="s1")
+lm(rt~noise,s1data)
+@
+
+Go back and look at the means for s1 for noise and compare them to the coefficients above.
+Now we can do this for every one of our 10 subjects. I don't print this result out because it's consume a lot of pages.
+
+<<print=FALSE>>=
+## do the same for each subject using a for-loop
+subjects<-paste("s",rep(1:10),sep="")
+for(i in subjects){
+  sdata<-subset(noisedeg,subj==i)
+        lm(rt~noise,sdata)
+}
+@
+
+There is a function in the package \texttt{lme4} that does the above for you: \texttt{lmList}.
+
+<<>>=
+library(lme4)
+lmlist.fm1<-lmList(rt~noise|subj,noisedeg)
+print(lmlist.fm1$s1)
+@
+
+One can plot the individual lines for each subject, as well as the linear model m0's line (this shows how each subject deviates in intercept and slope from the model m0's intercept and slopes). See Figure~\ref{fig:lmlistplot}.
+
+\begin{figure}[!htbp]
+<<fig=TRUE>>=
+plot(as.numeric(noisedeg$noise)-1,
+     noisedeg$rt,axes=F,
+     xlab="noise",ylab="rt")
+axis(1,at=c(0,1),
+     labels=c("no.noise","noise"))
+axis(2)
+
+subjects<-paste("s",1:10,sep="")
+
+for(i in subjects){
+abline(lmlist.fm1[[i]])
+}
+
+abline(lm(rt~noise,noisedeg),lwd=3,col="red")
+@
+\caption{Each subject's intercept and slope line varies about the averager over all subjects (the intercept and slope from the lm function).}\label{fig:lmlistplot}
+\end{figure}
+
+To find out if there is an effect of noise, you can simply check whether the slopes of the individual subjects' fitted lines taken together are significantly different from zero:
+
+<<>>=
+t.test(coef(lmlist.fm1)[2])
+@
+
+The above is called repeated measures regression (see \ref{lm90} for details). We now transition to the next stage: the linear mixed model.
+
+\subsection{Linear mixed model}
+
+The \textbf{linear mixed model} does something related to the above by-subject fits, but with some crucial differences, as we see below. In the model below, the 
+the statement (1$\mid$subj) means that the variance associated with subject intercepts should be estimated, and from that variance the intercepts for each subject should be predicted (I explain in section~\ref{blupprediction} how this prediction is done). 
+
+<<>>=
+## the following command fits a linear model, but in addition estimates between-subject variance:
+summary(m0.lmer<-lmer(rt~noise+(1|subj),noisedeg))
+@
+
+One thing to notice is that the coefficients of the fixed effects of the above model are identical to those in the linear model m0 above. 
+The predicted varying intercepts for each subject can be viewed by typing:
+
+<<>>=
+ranef(m0.lmer)
+@
+
+Or you can display them graphically as shown in Figure~\ref{fig:ranefs}.
+
+\begin{figure}[!htbp]
+<<fig=TRUE>>=
+print(dotplot(ranef(m0.lmer,postVar=TRUE)))
+@
+\caption{Plotting the varying intercepts.}\label{fig:ranefs}
+\end{figure}
+
+The model m0.lmer above prints out the following type of linear model; i indexes subjects, j indexes the noise factor (no noise or noise). Since we have two replicates of each noise factor level (one for degree 0 and one for degree 4), the index k indexes the degree level, although the degree factor is not fit in this example (in order to simplify the example).
+
+\begin{equation} \label{eqlmer}
+Y_{ijk} = \hat{\beta}_{0} + \hat{\beta}_{1j}x_{ijk} + b_i + \epsilon_{ijk} 
 \end{equation}
 
-where $i=1,\dots,m$, let $n$ be total number of data points.
+It's just like our linear model except that there are different \textit{predicted} (cf.\ the lmlist function above, where they are \textit{estimated} for each subject) intercepts $b_i$ for each subject. These are assumed by lmer to come from a normal distribution centered around 0; see \cite{gelmanhill07} for more details. The ordinary linear model m0 has one intercept $\beta_0$ for all subjects, whereas the linear mixed model with varying intercepts m0.lmer has a different intercept ($\beta_0 + b_i$) for each subject.
 
-Distributional assumptions:
+We can visualize these different intercepts for each subject as shown below in Figure~\ref{fig:varints}.
 
-$ b_i \sim N(0,D)$ and $\epsilon_i \sim N(0,\sigma^2 I)$. $D$ is a $q\times q$ matrix that does not depend on $i$, and $b_i$ and $\epsilon_i$ are assumed to be independent.
+\begin{figure}[!htbp]
+<<fig=TRUE>>=
+a<-fixef(m0.lmer)[1]
+newa<-a+ranef(m0.lmer)$subj
 
-$Y_i$ has a multivariate normal distribution:
+ab<-data.frame(newa=newa,b=fixef(m0.lmer)[2])
 
-\begin{equation}
-Y_i \sim N(X_i \beta, V(\alpha))
-\end{equation}
+plot(as.numeric(noisedeg$noise)-1,noisedeg$rt,xlab="noise",ylab="rt",axes=F)
+axis(1,at=c(0,1),labels=c("no.noise","noise"))
+axis(2)
+for(i in 1:10){
+abline(a=ab[i,1],b=ab[i,2])
+}
+abline(lm(rt~noise,noisedeg),lwd=3,col="red")
+@
+\caption{Varying intercepts for subjects, with the linear model fit superimposed.}\label{fig:varints}
+\end{figure}
 
-where $V(\alpha)=Z_i D Z_i^T+\sigma^2 I$, and $\alpha$ is the variance component parameters.
+Note that, unlike the figure associated with the lmlist.fm1 model above, which also involves fitting separate models for each subject, the model m0.lmer assumes different intercepts for each subject \textbf{but the same slope}. We can have lmer fit different intercepts as well as different slopes for each subject:
 
-Note:
-\begin{enumerate}
-\item
-D has to be symmetric and positive definite. 
-\item
-The $Z_i$ matrix columns are a subset of $X_i$. In the random intercept model, $Z_i = 1_i$.
-\item
-In the varying intercepts and varying slopes model, $X_i = Z_i = (1_i, X_i)$. Then:
+<<>>=
+summary(m1.lmer<-lmer(rt~noise+(1+noise|subj),noisedeg))
+@
 
-\begin{equation}
-Y_i = X_i (\beta+b_i) +\epsilon_i
-\end{equation}
+These fits for each subject are visualized below (the red line shows the model with a single intercept and slope, i.e., our old model m0):
 
-or
+<<fig=TRUE>>=
+(a<-fixef(m1.lmer)[1])
+(b<-fixef(m1.lmer)[2])
 
-\begin{equation}
-Y_i = X_i \beta_i +\epsilon_i \quad \beta_i \sim N(\beta,D)
-\end{equation}
+newa<-a+ranef(m1.lmer)$subj[1]
+newb<-b+ranef(m1.lmer)$subj[2]
+## make this into a data frame:
+ab<-data.frame(newa=newa,b=newb)
 
-\begin{equation}
-\begin{split}
-D=&
-\begin{pmatrix}
-d_{00} & d_{01}\\
-d_{10} & d_{11}\\
-\end{pmatrix}\\
-=& 
-\begin{pmatrix}
-d_{00}=Var(\beta_{i0}) & d_{01}=Cov(\beta_{i0},\beta_{i1})\\
-d_{10}=Cov(\beta_{i0},\beta_{i1}) & d_{11}=Var(\beta_{i1})\\
-\end{pmatrix}
-\end{split}
-\end{equation}
+plot(as.numeric(noisedeg$noise)-1,noisedeg$rt,xlab="noise",ylab="rt",axes=F,
+main="varying intercepts and slopes for each subject")
+axis(1,at=c(0,1),labels=c("no.noise","noise"))
+axis(2)
 
-\item
-The conditional mean of $Y$ given the block effect $b_i$ is:
+for(i in 1:10){
+abline(a=ab[i,1],b=ab[i,2])
+}
 
-\begin{equation}
-E(Y\mid b_i) = X_i \beta + Z_i b_i
-\end{equation}
+abline(lm(rt~noise,noisedeg),lwd=3,col="red")
+@
 
-\item
-The marginal mean for $Y$:
+Compare this model with the lmlist.fm1 model we fitted earlier; see Figure~\ref{fig:comparelmerlmlist}.
 
-\begin{equation}
-\begin{split}
-E(Y_i) = & E(E(Y_i\mid b_i))\\
-      = & E(X_i \beta + Z_i b_i) \\
-      = & X_i \beta
-\end{split}
-\end{equation}
+\begin{figure}[!htbp]
+<<fig=TRUE,echo=FALSE,print=FALSE,width=6>>=
+multiplot <- function(row,col){
+     par(mfrow=c(row,col),pty="s")
+   }
 
-\item
-The conditional variance of $Y$ given the block effect $b_i$ is:
+multiplot(1,2)
 
-\begin{equation}
-Cov(Y_i \mid b_i) = Cov(\epsilon_i) = \sigma^2 I
-\end{equation}
+plot(as.numeric(noisedeg$noise)-1,noisedeg$rt,axes=F,xlab="noise",ylab="rt",main="ordinary linear model")
+axis(1,at=c(0,1),labels=c("no.noise","noise"))
+axis(2)
 
-\item The marginal variance of $Y$ averaged over the distributions of $b_i$ is
+subjects<-paste("s",1:10,sep="")
 
-\begin{equation}
-\begin{split}
-Cov(Y_i) =& Cov(Z_i b_i) + Cov(\epsilon_i)\\
- =& Z_i Cov(b_i) Z_i^T + Cov(\epsilon_i)\\
- =& Z_i D Z_i^T + \sigma^2 I
-\end{split}
-\end{equation}
+for(i in subjects){
+abline(lmlist.fm1[[i]])
+}
 
-\end{enumerate}
+abline(lm(rt~noise,noisedeg),lwd=3,col="red")
 
-\subsection{$\sigma_b^2$ is between-block variance, and within block covariance}
+a<-fixef(m1.lmer)[1]
+b<-fixef(m1.lmer)[2]
 
-Consider the following model, a varying intercepts model:
+newa<-a+ranef(m1.lmer)$subj[1]
+newb<-b+ranef(m1.lmer)$subj[2]
 
-\begin{equation}
-Y_{ij} = \mu + b_i + e_{ij},
-\end{equation}
+ab<-data.frame(newa=newa,b=newb)
 
+plot(as.numeric(noisedeg$noise)-1,noisedeg$rt,axes=F,
+main="varying intercepts and slopes",xlab="noise",ylab="rt")
+axis(1,at=c(0,1),labels=c("no.noise","noise"))
+axis(2)
 
-with $b_i\sim N(0,\sigma^2_b)$, $e_{ij}~N(0,\sigma^2)$.
+for(i in 1:10){
+abline(a=ab[i,1],b=ab[i,2])
+}
 
-Note that variance is a covariance of a random variable with itself, and then consider the model formulation. If we have
+abline(lm(rt~noise,noisedeg),lwd=3,col="red")
+@
+\caption{Comparing the lmList and lmer estimates for each subject.}\label{fig:comparelmerlmlist}
+\end{figure}
 
-\begin{equation}
-Y_{ij} = \mu + b_i + \epsilon_{ij}
-\end{equation}
-
-where i is the group, j is the replication, if we \textit{define} $b_i\sim N(0, \sigma^2_b)$, and refer to $\sigma^2_b$ as the between group variance, then we must have
-
-
-\begin{equation}
-\begin{split}
-Cov(Y_{i1}, Y_{i2}) =& Cov(\mu + b_i + \epsilon_{i1} , \mu + b_i + \epsilon_{i2})\\
-=& \explain{Cov(\mu, \mu)}{=0} + 
- \explain{Cov(\mu, b_i)}{=0} +
- \explain{Cov(\mu, \epsilon_{i2})}{=0}+ \\
- ~~& \explain{Cov(b_i,\mu)}{=0} +
-  \explain{Cov(b_i,b_i)}{+ve} \dots\\
-  =&  Cov(b_i, b_i) = Var(b_i) = \sigma^2_b\\
-\end{split}
-\end{equation}
+The above graphic shows some crucial difference between the lmlist (repeated measures) model and the lmer model. Note that the fitted line for each subject in the lmer model is much closer to the m0 model's fitted (red) line. This is because lmlist uses each subject's data separately (resulting in possibly wildly different models, depending on the variability between subjects), whereas lmer ``borrows strength from the mean'' and pushes (or ``shrinks'') the estimated intercepts and slopes of each subject closer to the mean intercepts and slopes (the model m0's intercepts and slopes). Because it shrinks the coefficients towards the means, this is called shrinkage. This is particularly useful when several data points are missing in a particular condition for a particular subject: in an ordinary linear model, estimating coefficients using lmList would lead to very poor estimates for that subject; by contrast, lmer assumes that the estimates for such a subject are not reliable and therefore shrinks that subject's estimate to the mean values.
+Gelman and Hill provide an example of this (their Laq qui parle example).
 
 \subsection{Some basic types of linear mixed model and their variance components}
 
@@ -3245,9 +3365,10 @@ V =
 
 \subsection{Parameter estimation}
 
-\subsubsection{Likelihood based model fitting procedure}
+There are two basic procedures, likelihood based and REML (restricted or residual ML).
 
-Recall:
+\textbf{The Likelihood based model fitting procedure}.
+Here are some relevant facts we need to know in order to work out how parameter estimation is done in LMMs using likelihoods.
 
 \begin{enumerate}
 \item If we have two continuous random variables $Y$ and $Z$, with density functions $f_Y(y)$ and $f_Z(z)$ and joint density $f_{Y,Z}(y,z)$, then
@@ -3266,19 +3387,19 @@ f_{Y\mid Z}(y\mid z) = \frac{f_{Y,Z}(y,z)}{f_Z(z)}
 \noindent
 so we can write 
 
-\begin{equation}
+\begin{equation}\label{eq2a}
 f_{Y,Z}(y,z) = f_{Y\mid Z}(y\mid z) \times f_Z(z).
 \end{equation}
 
 \item
-Combining equations \ref{eq1} and \ref{eq2}, we have
+Combining equations \ref{eq1} and \ref{eq2a}, we have
 
 \begin{equation} \label{eq3}
-f_Y(y) = \int f_{Y\mid Z}(y\mid z) * f_Z(z)dz
+f_Y(y) = \int f_{Y\mid Z}(y\mid z) \times f_Z(z)dz
 \end{equation}
 \end{enumerate}
 
-Equation \ref{eq3}, where we condition on a second random variable Z (note that Z could be ``non-observable'') can be helpful in deriving $f_Y(y)$, if the two densities on the RHS are easy to write down, and the integral can be solved.
+Equation \ref{eq3}, where we condition on a second random variable Z (note that Z could be a ``non-observable'', which is what the varying intercepts and slopes are---they are not observed as data), can be helpful in deriving $f_Y(y)$, if the two densities on the RHS are easy to write down, and the integral can be solved.
 
 Returning to parameter estimation in LMMs, the model is:
 
@@ -3298,20 +3419,18 @@ L(\beta,\theta,\sigma^2\mid y) =& p(y:\beta,\theta,\sigma^2)\\
 \end{equation}
 
 \noindent
-we want the density of the observations ($y_i$) given the parameters $\beta, \theta$ and $\sigma^2$ only. In this case, using equation \ref{eq3} above, with $Y=y_i$ and $Z=b_i$ is helpful for deriving the density for $y_i$, because $f(y_i\mid b_i)$ (or, in the notation of (4.9), $p(y_i\mid b_i,\beta,\sigma^2)$) has a simple form, and so we can get a closed form expression for the integral.
+we want the density of the observations ($y_i$) given the parameters $\beta, \theta$ and $\sigma^2$ only. In this case, using equation \ref{eq3} above, with $Y=y_i$ and $Z=b_i$ is helpful for deriving the density for $y_i$, because $f(y_i\mid b_i)$ (or $p(y_i\mid b_i,\beta,\sigma^2)$) has a simple form, and so we can get a closed form expression for the integral.
 
-\subsubsection{REML estimation (REstricted/REsidual ML)}
-
-To estimate variance parameters, \textbf{first fit fixed effects using least squares}, and then focus attention on  residuals. 
-
+\textbf{REML estimation (REstricted/REsidual ML)}.
+To estimate variance parameters, first fit fixed effects using least squares, and then focus attention on  residuals. 
 The \textbf{residuals}' distribution depends on $\sigma^2$ and variance parameters $\theta$ of random effects.  
 
 A \textbf{likelihood} for these parameters is formed based on the residuals alone. Maximization of this \textbf{marginal likelihood} gives estimates of
 $\sigma^2$ and the other variance-covariance parameters which are less biased than the full maximum likelihood estimates.
 
-Once the REML variance-covariance estimates are obtained the \textbf{fixed effects are re-estimated by maximum likelihood assuming the random effects parameters are known}, a procedure equivalent to generalized least squares.
+Once the REML variance-covariance estimates are obtained the \textbf{fixed effects are re-estimated by maximum likelihood assuming the random effects parameters are known}.
 
-Alternatively, define a restricted likelihood:
+Alternatively, we can define a restricted likelihood:
 
 \begin{equation}
 L_R (\theta,\sigma^2\mid y) = \int L(\beta,\theta,\sigma^2\mid y)\,d\beta
@@ -3319,150 +3438,22 @@ L_R (\theta,\sigma^2\mid y) = \int L(\beta,\theta,\sigma^2\mid y)\,d\beta
 
 and maximize this to obtain estimates of these parameters.
 
-Unlike full (max.) likelihood, restricted lik.\ is not invariant to parameterization, so we cannot compare models with different fixed effects. 
+Unlike full (max.) likelihood, restricted likelihood is not invariant to parameterization, so we cannot compare models with different fixed effects. 
 
-\subsubsection{How the random effects are 'predicted' when using the ranef() command}
+\subsection{Computing the BLUPs} \label{blupprediction}
 
-In linear mixed models, we fit models like these (the Ware-Laird formulation--see Pinheiro and Bates 2000, for example):
+In a varying intercepts model, the intercept $b_i$ for subjects $i=1,\dots,I$ (assume that each subject has $n_i$ data points) is a latent variable, it cannot be observed. So how is it computed? We can predict these BLUPs using a method called \textbf{empirical Bayes estimation}, and generate something called posterior means. This method combines two kinds of information:
+(a) the data from group $i$, and (b) the fact that the unobserved $b_i$ is a random variable with mean 0 and variance $\sigma_b^2$.
 
-\begin{equation} 
-Y = X\beta + Zu + \epsilon
-\end{equation}
-
-Let $u\sim N(0,\sigma_u^2)$, and this is independent from $\epsilon\sim N(0,\sigma^2)$.  
-
-Given $Y$, the ``minimum mean square error predictor'' of $u$ is the conditional expectation:
+The posterior means $\hat{b}_i$ are given by 
 
 \begin{equation}
-\hat{u} = E(u\mid Y)
+\hat{b}_i = E[\hat{b}_i\mid y, \beta] = \frac{\sigma_b^2}{\sigma_b^2 + \sigma_e^2/n_i}(\bar{y}_{\cdot i} - \bar{y})
 \end{equation}
 
-We can find $E(u\mid Y)$ as follows. We write the joint distribution of $Y$ and $u$ as:
+You have never seen an expression like $\bar{y}_{\cdot i}$, but it just means the group means (that subject's mean score over the $n_i$ data points). The term $\frac{\sigma_b^2}{\sigma_b^2 + \sigma_e^2/n_i}$ is called a shrinkage factor; it can be at most 1. It will approach $1$ when we have $n_i$ approaching infinity, and will be small if $n_i$ is a small number. The implication of this shrinkage factor is that if we have only a few data points for a particular subject, then its value will be shrunk towards the grand mean---the example we saw earlier.
 
-\begin{equation}
-\begin{pmatrix}
-Y \\
-u
-\end{pmatrix}
-= 
-N\left(
-\begin{pmatrix}
-X\beta\\
-0
-\end{pmatrix},
-\begin{pmatrix}
-V_Y & C_{Y,u}\\
-C_{u,Y} & V_u \\
-\end{pmatrix}
-\right)
-\end{equation}
 
-$V_Y, C_{Y,u}, C_{u,Y}, V_u$ are the various variance-covariance matrices. 
-It is a fact that
-
-\begin{equation}
-u\mid Y ~N(C_{u,Y}V_Y^{-1}(Y-X\beta)), 
-Y_u - C_{u,Y} V_Y^{-1} C_{Y,u})
-\end{equation}
-
-This allows you to derive the BLUPs:
-
-\begin{equation}
-\hat{u}= C_{u,Y}V_Y^{-1}(Y-X\beta))
-\end{equation}
-
-Substituting $\hat{\beta}$ for $\beta$, we get:
-
-\begin{equation}
-BLUP(u)= \hat{u}(\hat{\beta})C_{u,Y}V_Y^{-1}(Y-X\hat{\beta}))
-\end{equation}
-
-Here's an example with R. We will use the ergoStool data from the nlme package (precursor to lme4); see the documentation in R for this data by typing ?ergoStool after loading the package.
-
-<<>>=
-## Calculate the predicted random 
-## effects by hand for the 
-## ergoStool data
-library(nlme)
-fm1<-lmer(effort~Type-1 + 
-            (1|Subject),ergoStool)
-
-## Here are the BLUPs we will 
-## estimate by hand:
-head(ranef(fm1))
-
-## this gives us all the 
-## variance components:
-## this could have been done ``by hand'',
-## or at least an approximation:
-VarCorr(fm1)
-@
-
-The calculations by hand are as follows:
-
-\begin{enumerate}
-\item
-First, calculate the predicted random effect for subject 1. The variance for the random effect is the term $C_{u,Y}$.
-
-<<>>=
-## The variance for the random 
-## effect subject is the term C_{u,Y}:
-(covar.u.y<-VarCorr(fm1)$Subject[1])
-@
-
-\item 
-Estimated covariance between $u_1$ and $Y_1$;
-make up a var-covar matrix from this:
-
-<<>>=
-(cov.u.Y<-matrix(covar.u.y,1,4))
-@
-
-\item
-Estimated variance matrix for $Y_1$:
-
-<<>>=
-(V.Y<-matrix(1.7755,4,4)+
-   diag(1.2106,4,4))
-@
-
-\item
-Extract observations for subject 1:
-
-<<>>=
-(Y<-matrix(ergoStool$effort[1:4],4,1))
-@
-
-\item
-Estimated fixed effects:
-
-<<>>=
-(beta.hat<-matrix(fixef(fm1),4,1))
-@
-
-\item
-Predicted random effect:
-
-<<>>=
-cov.u.Y %*% solve(V.Y)%*%(Y-beta.hat)
-@
-\end{enumerate}
-
-Compare the above calculation by hand with the output of the \texttt{ranef} command:
-
-<<>>=
-ranef(fm1)$Subject[1,1]
-@
-
-We can also calculate predicted random effects (BLUPs) for all subjects as follows:
-
-<<>>=
-t(cov.u.Y %*% solve(V.Y)%*%
-    (matrix(ergoStool$effort,4,9)-
-       matrix(fixef(fm1),4,9)))
-## compare
-ranef(fm1)
-@
 
 \subsection{Correlation of fixed effects}
 
@@ -3473,8 +3464,10 @@ For an ordinary linear model, the covariance matrix (from which we can get the c
 \end{equation}
 
 For a mixed effects model, the standard deviations (standard errors) and correlations for the fixed effects estimators are listed at the end of the lmer output. 
+Here is an example from a data-set that measures some dependent variable ``wear'' as a function of three material types for 10 subjects:
 
 <<>>=
+BHHshoes<-read.table("datacode/BHHshoes.txt")
 lm.full<-lmer(wear~material-1+
                 (1|Subject), 
               data = BHHshoes)
@@ -3487,7 +3480,6 @@ materialB 0.988
 \end{verbatim}
 
 Doing this by hand:
-
 
 \begin{equation}
 \hat{\beta}_1 = (Y_{1,1} + Y_{2,1} + \dots + Y_{10,1})/10
@@ -3515,10 +3507,6 @@ covar/(sds[1]*sds[2])
 #cf:
 covar/((0.786*sqrt(10))^2)  
 @
-
-\section{Bayesian data analysis: linear models and linear mixed models}
-
-
 
 \section*{Acknowledgements}
 
