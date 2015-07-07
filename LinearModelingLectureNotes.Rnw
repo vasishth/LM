@@ -1808,11 +1808,15 @@ If we had had $p\leftrightarrow q$, then we could draw this conclusion. Google f
 
 An example is an MIT senior research scientist at CSAIL (see the interview with this professor, http://www.collective-evolution.com/2015/02/17/mit-professor-explains-the-vaccine-autism-connection/), who claims that vaccines are causing autism in children. This is based on a linear model fit, regressing number of autism case against amount of vaccination (or something like that, I forget the details).
 
+
+
 Reality: Two points here are that correlation does not imply causation, and there will be at least a $0.05$ (but as high as $0.40$ in some cases) probability of incorrectly rejecting the null. Most published significant results are in fact false.
 For recent attempts to get a handle on this, see: http://www.nature.com/news/first-results-from-psychology-s-largest-reproducibility-test-1.17433.
 \end{enumerate}
 
-Another important point is that just computing the p-value is not enough. If you have some way to determine an estimate of the true effect size for a particular phenomenon (say, through a meta-analsis or literature review or expert knowledge about the topic you are studying), then you can and should (I would say, must) also compute Type S and M errors; see \cite{gelmancarlin} for further discussion.
+In frequentist statistics, we can also compute Type I and Type II error rates. Type I error is the probability of incorrectly rejecting the null (when it's actually true); this is typically set at $0.05$ by the researcher and is called the $\alpha$ value.  Type II error is defined as the probability of incorrectly ``accepting'' (more accurately, failing to reject) the null hypothesis when it's false. (1-Type II) error is called power, and is the probability of correctly rejecting the null.\footnote{Note that all our definitions here are with respect to the null hypothesis---it is a mistake to think that Type II error is the probability of failing to accept the alternative hypothesis when it's true. We can only ever reject or not reject the null; our hypothesis test is always with reference to the null.}
+
+Another important point is that just computing the p-value is not enough. If you have some way to determine an estimate of the true effect size for a particular phenomenon (say, through a meta-analsis or literature review or expert knowledge about the topic you are studying), then you can and should (I would say, must) also compute Type S and M errors; see the Gelman and Carlin article\cite{gelmancarlin} for further discussion.
 
 For example, if your true effect size is believed to be D=15, then we can compute (apart from statistical power) these error rates, which are defined as follows:
 
@@ -1826,7 +1830,7 @@ Gelman and Carlin also call this the exaggeration ratio, which is perhaps more d
 
 Suppose a particular study has standard error 46, and sample size 37. And suppose that our estimated true D=15. Then, we proceed as follows:
 
-<<typesandm,cache=TRUE,echo=FALSE>>=
+<<typesandm,cache=TRUE,echo=TRUE>>=
 ## probable effect size derived from past studies:
 D<-15
 ## SE from the study of interest:
@@ -1854,6 +1858,8 @@ typem_sig<-mean(abs(drep[signif])/D)
 ## Type M error rate | not-signif: 2.3 
 typem_nonsig<-mean(abs(drep[-signif])/D)
 @
+
+So, you can see that the Type S error and the exaggeration ratio, conditional on a result being significant, are pretty high. The practical implication of this is that if most studies in psycholinguistics are low powered, then it doesn't matter much whether you got a significant result or not. You could be (and probably are) barking up the wrong tree. The main take-away point here is: run high powered studies, and replicate the results. There's really no statistical test out there that can match consistent replication.
 
 
 \subsection{Hypothesis tests and the sampling distribution of the mean}
