@@ -1,0 +1,542 @@
+\documentclass[12pt]{article}
+%\usepackage[landscape]{geometry}  
+\usepackage[landscape,hmargin=2cm,vmargin=1.5cm,headsep=0cm]{geometry} 
+% See geometry.pdf to learn the layout options. There are lots.
+\geometry{a4paper}                   % ... or a4paper or a5paper or ... 
+%\geometry{landscape}                % Activate for for rotated page geometry
+%\usepackage[parfill]{parskip}    % Activate to begin paragraphs with an empty line rather than an indent
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{epstopdf}
+\usepackage{multicol}
+
+\usepackage{framed}
+
+\newcommand{\vect}[1]{\vec{#1}}
+
+
+\usepackage[table]{xcolor}
+
+\newcommand\x{\times}
+\newcommand\y{\cellcolor{green!10}}
+
+
+\newcommand{\argmin}{\arg\!\min}
+\newcommand{\argmax}{\arg\!\max}
+
+
+\newtheorem{definition}{Definition}
+
+\newtheorem{theorem}{Theorem}
+
+\newtheorem{fact}{Fact}
+
+\newtheorem{proposition}{Proposition}
+
+
+% Turn off header and footer
+\pagestyle{plain}
+ 
+
+% Redefine section commands to use less space
+\makeatletter
+\renewcommand{\section}{\@startsection{section}{1}{0mm}%
+                                {-1ex plus -.5ex minus -.2ex}%
+                                {0.5ex plus .2ex}%x
+                                {\normalfont\large\bfseries}}
+\renewcommand{\subsection}{\@startsection{subsection}{2}{0mm}%
+                                {-1explus -.5ex minus -.2ex}%
+                                {0.5ex plus .2ex}%
+                                {\normalfont\normalsize\bfseries}}
+\renewcommand{\subsubsection}{\@startsection{subsubsection}{3}{0mm}%
+                                {-1ex plus -.5ex minus -.2ex}%
+                                {1ex plus .2ex}%
+                                {\normalfont\small\bfseries}}
+\makeatother
+
+% Define BibTeX command
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+% Don't print section numbers
+\setcounter{secnumdepth}{0}
+
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt plus 0.5ex}
+
+\DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
+
+%% taken from http://brunoj.wordpress.com/2009/10/08/latex-the-framed-minipage/
+\newsavebox{\fmbox}
+\newenvironment{fmpage}[1]
+{\begin{lrbox}{\fmbox}\begin{minipage}{#1}}
+{\end{minipage}\end{lrbox}\fbox{\usebox{\fmbox}}}
+
+\usepackage{mathtools}
+\makeatletter
+ 
+\newcommand{\explain}[2]{\underset{\mathclap{\overset{\uparrow}{#2}}}{#1}}
+\newcommand{\explainup}[2]{\overset{\mathclap{\underset{\downarrow}{#2}}}{#1}}
+ 
+\makeatother
+
+\title{Linear Modeling Summary Sheet}
+\author{Shravan Vasishth (vasishth@uni-potsdam.de)}
+%\date{}                                           % Activate to display a given date or no date
+
+
+
+
+\begin{document}
+
+\footnotesize
+\maketitle
+\tableofcontents
+
+\newpage
+
+<<setup,include=FALSE,cache=FALSE>>=
+library(knitr)
+library(coda)
+
+# set global chunk options, put figures into folder
+options(replace.assign=TRUE,show.signif.stars=FALSE)
+opts_chunk$set(fig.path='figures/summaryfigure-', fig.align='center', fig.show='hold')
+options(replace.assign=TRUE,width=75)
+opts_chunk$set(dev='postscript')
+#library(rstan)
+#set.seed(9991)
+# save workspace image, if you want
+#the.date <- format(Sys.time(), "%b%d%Y")
+#save.image(file=paste0("homework01-",the.date,".RData")
+@
+
+% multicol parameters
+% These lengths are set only within the two main columns
+%\setlength{\columnseprule}{0.25pt}
+\setlength{\premulticols}{1pt}
+\setlength{\postmulticols}{1pt}
+\setlength{\multicolsep}{1pt}
+\setlength{\columnsep}{2pt}
+
+\begin{center}
+     \normalsize{Linear Modeling Summary Sheet} \\
+    \footnotesize{
+    Compiled by: Shravan Vasishth (vasishth@uni-potsdam.de)\\
+    Version dated: \today}
+\end{center}
+
+\section{Maximum likelihood estimation}
+
+\subsection{Binomial}
+
+\begin{equation}
+L(\theta) = {n \choose x} \theta^x (1-\theta)^{n-x}  
+\end{equation}
+
+MLE: $\hat \theta = \frac{x}{n}$.
+
+\subsection{Normal}
+
+\subsection{Exponential}
+
+\begin{eqnarray}
+L(\mu; \sigma^2) =& \prod N(x_i; \mu, \sigma)  \\
+                 =& (\frac{1}{\sigma \sqrt{2 \pi}})^n \exp (-\frac{1}{2\sigma^2} \sum_{i=1}^n (x_i - \mu)^2)\\ 
+\end{eqnarray}
+
+The MLEs:
+
+\begin{equation}
+  \hat \mu = \frac{1}{n}\sum x_i = \bar{x}  
+\end{equation}
+
+\begin{equation}
+  \hat \sigma ^2 = \frac{1}{n-1}\sum (x_i-\bar{x})^2
+\end{equation}
+
+\subsection{Exponential:}
+
+\begin{equation}
+  f(x; \lambda)= \lambda \exp (- \lambda x)
+\end{equation}
+
+MLE:
+
+\begin{equation}
+  \frac{n}{\lambda} =  \sum x_i
+\end{equation}
+
+\subsection{Practical implication of MLE}
+
+Having decided that some data $x_i$, $i=1,\dots,n$ can be modeled as being generated from the normal distribution (for example), we can obtain estimates of the parameters using the closed-form expressions for the MLEs above.
+
+\section{Asymptotic properties of MLEs}
+
+The first essential point here is that under repeated sampling, the sampling distribution of the MLEs is asymptotically normal. This is the Central Limit Theorem.
+
+The second essential point here is that under repeated sampling, we can compute the standard deviation of the sampling distribution of the MLE. This standard deviation is the \textbf{standard error}, and the SE is what allows us to do inference (hypothesis testing). We can compute the SE using the closed-form expression (derived in the lecture notes), where $\hat\sigma$ is the estimate of the standard deviation, and $n$ is the sample size:
+
+\begin{equation}
+SE = \hat\sigma / \sqrt{n}
+\end{equation}
+
+\subsection{SE in the Binomial}
+
+$SE = \sqrt{\frac{\hat p (1-\hat p)}{n}}$
+
+\subsection{SE in the Normal}
+
+$SE = \frac{\hat \sigma}{\sqrt{n}}$
+
+\subsection{Practical implication}
+
+Given an MLE for the mean $\bar{x}$, and the standard deviation $\hat \sigma$, from a single sample of size $n$, we can use these asymptotic properties and closed form solutions to derive an estimate of the SE. 
+
+That in turn allows us to compute the 95\% confidence interval:
+
+$\bar{x} \pm 2 \times SE$
+
+which has the weird interpretation that if we were to repeatedly sample 100 times, 95\% of those hypothetical CIs would contain the true value of the parameter ($\mu$, which is a point value).
+
+\subsection{Connection to linear models}
+
+In linear models, we will have models like 
+
+\begin{equation}
+y=\beta_0 + \beta_1 x + \varepsilon \quad \varepsilon \sim N(0,\sigma^2)
+\end{equation}
+
+We will compute MLEs of the $\beta$ parameters and of $\sigma$, and then we will do hypothesis testing using the estimated SEs of the $\beta$.
+
+\section{Basic theory of linear models}
+
+We can compute MLEs and SEs of $\beta$ using these matrix results:
+
+\begin{equation}
+\hat\beta = (X^TX)^{-1}X^T Y
+\end{equation}
+
+\begin{equation}\label{vcovmatrixformula}
+Var(\beta)= \sigma^2 [(X^TX)^{-1}]
+\end{equation}
+
+
+For example, consider the design matrix with only eight data points:
+
+<<>>=
+(X<-matrix(c(rep(1,8),rep(c(-1,1),each=4),
+            rep(c(-1,1),each=2,2)),ncol=3))
+library(Matrix)
+## det non-zero, hence full rank, hence invertible:
+det(t(X)%*%X)
+@
+
+Generate some hypothetical data with known $\beta$:
+
+<<>>=
+beta<-matrix(c(2,0.5,0.25),nrow=3)
+sigma<-1
+n<-8
+## some hypothetical data:
+Y<-X%*%beta + matrix(rnorm(n,0,sigma),nrow=n)
+@
+
+You can compute the estimates of $\beta$ by hand here:
+
+<<>>=
+## inverse of X^T X:
+(invXTX<-solve(t(X)%*%X))
+## (X^T X)^{-1} X^T Y:
+(hatbeta<-solve(t(X)%*%X)%*%t(X)%*%Y)
+@
+
+The SEs are the square roots of the diagonals in the variance covariance matrix. We first have to get an estimate of $\sigma$, which is $\sum e_i^2/(n-p)$, where p is the number of $\beta$ parameters (here, 3):
+
+
+<<>>=
+p<-3
+e<-Y - X%*%hatbeta
+(hatsigma2<-sum(e^2)/(n-p))
+(hatsigma<-sqrt(hatsigma2))
+@
+
+Check that \texttt{lm} also gives this $\sigma$ estimate:
+
+<<>>=
+m<-lm(Y ~ X[,2]+X[,3])
+summary(m)$sigma
+@
+
+Now we are ready to compute the variance covariance matrix of the $\beta$, using the closed-form expression in equation~\ref{vcovmatrixformula}:
+
+<<>>=
+round(hatsigma2 * invXTX,digits=3)
+@
+
+Check that lm also produces this variance-covariance matrix (identical perhaps up to rounding error):
+
+<<>>=
+round(vcov(m),digits=3)
+@
+
+\section{Inference}
+
+Having estimated $\beta$ and their SEs, we are ready to do inference.
+
+\subsection{Wald statistic (t-test)}
+
+\begin{equation}
+\frac{\hat\beta_j - \beta_j}{\sqrt{Var(\beta_j)}} \sim Normal(0,1)
+\end{equation}
+
+For each $\beta_j$, this statistic tests the null hypothesis that $\beta_j=0$. If the null hypothesis is true, and the sample mean $\beta_j \sim N(0,SE_{\beta_j}^2)$. So, if the $\hat \beta_j$ we get is extremely far away from 0, we reject the null.
+
+The convention is that if the probability of getting a $\hat\beta_j$ that we got, or something more extreme in either direction, is less than 0.05, then we reject the null. 
+
+The p-value is the \textbf{conditional} probability of getting such a $\hat \beta_j$ estimate (or something more extreme), assuming that the null is true. \textbf{It is not the probability of the null being true}.
+
+The t-value in \texttt{lm} that comes with a Wald test is with reference to the t-distribution with $n-1$ degrees of freedom. The t-distribution is an approximation to the normal. It has  more probability mass in the tails for $n<15$ or so. Beyond $n=15$, the normal and t-distribution are basically indistinguishable. 
+
+The t-value is the number of SEs that the observed $\hat\beta_j$ is away from the hypothesized mean $\beta$ (usually 0):
+
+
+\begin{equation}
+t=\frac{\hat\beta_j - \beta_j}{\sqrt{Var(\beta_j)}} \sim t(n-1)
+\end{equation}
+
+R functions analogous to those we have seen for normal and binomial distributions are available for t-distributions:
+
+<<>>=
+## area to the left of -2 in t(8):
+pt(-2,df=8)
+## critical t-value in t(8):
+qt(0.025,df=8)
+@
+
+For large n (basically, anything larger than 15 or so data points), the critical t-value (the smallest t-value that would reject the null) is about 2.
+
+\subsection{Type I, II, error, power, Type S and M errors}
+
+In frequentist statistics, we can also compute Type I and Type II error rates. 
+
+Type I error is the probability of incorrectly rejecting the null (when it's actually true); this is typically set at $0.05$ by the researcher and is called the $\alpha$ value.  
+
+Type II error is defined as the probability of incorrectly ``accepting'' (more accurately, failing to reject) the null hypothesis when it's false. 
+
+(1-Type II) error is called power, and is the probability of correctly rejecting the null.
+
+Gelman adds two more errors:
+
+Type S error: the probability that the sign of the effect is incorrect, given that (a) the result is statistically significant, or (b) the result is statistically non-significant.
+
+Type M error: the expectation of the ratio of the absolute magnitude of the effect to the hypothesized true effect size (conditional on whether the result is significant or not). 
+Gelman and Carlin also call this the exaggeration ratio, which is perhaps more descriptive than ``Type M error''.
+
+For low power studies, Type S and M errors are embarrassingly huge. The take-home point is that if you are running a low power experiment, then even if you get a significant p value, don't get too excited---you're as likely to get the sign wrong as you are to get it right, and you are very likely to get a hugely exaggerated estimated of the true effect size.
+
+You can get a feel for how bad the situation is by using our simulation above with eight data points, this time increasing sigma to 100.
+
+<<>>=
+beta<-matrix(c(2,0.5,0.25),nrow=3)
+sigma<-100
+n<-8
+## some hypothetical data:
+Y<-X%*%beta + matrix(rnorm(n,0,sigma),nrow=n)
+##good luck estimating beta:
+m<-lm(Y~X[,2]+X[,3])
+summary(m)
+@
+
+\subsection{Likelihood ratio test}
+
+This is an alternative way to do hypothesis testing by explicitly comparing models that are more vs less complex (the simpler model is nested inside the other---in our examples, the simpler model has one predictor less).
+
+Suppose that we have some data $x_1,\dots, x_n$ from a random variable X whose distribution depends on the parameter $\theta$. Suppose also that we want to test a hypothesis $H_0$ against $H_1$. 
+
+Define the \textbf{likelihood ratio test statistic} as
+
+\begin{equation}
+\lambda = 2 \{\ell(\theta_1) - \ell(\theta_0)\}
+\end{equation}
+
+where $\theta_1$ and $\theta_0$ are the estimates of $\theta$ under the alternative and null hypotheses, respectively. The likelihood ratio test rejects $H_0$ if $\lambda$ is sufficiently large. As the sample size approaches infinity,
+
+\begin{equation}
+\lambda = \chi_r^2
+\end{equation}
+
+where r is called degrees of freedom and is the difference in the number of parameters estimated under $H_1$ and $H_0$. This is called Wilks' theorem.
+
+Note that sometimes you will see the equivalent form:
+
+\begin{equation}
+\lambda = -2 \{\ell(\theta_0) - \ell(\theta_1)\}
+\end{equation}
+
+The test has a logic similar to the t-test. If the estimate of $\lambda$ is highly unlikely given the null, which has the distribution $\chi_r^2$ for $\lambda$, then we reject the null. Again, we compute the p-value with reference to some distribution, which is the chi-squared distibution here.
+
+\subsection{ANOVA}
+
+Here, we compute the F-ratio, which is the ratio of between group variance to within-group variance. The basic calculations are summarized below:
+
+\begin{table}[htdp]
+\caption{default}
+\begin{center}
+\begin{tabular}{|c|c|c|c|}
+\hline
+Source of variance & df & Sum of squares & Mean square\\
+\hline
+Model with $\beta_0$ & q & $\beta_0^T X_0^T Y$ & \\
+Improvement due to & p-q & $\hat \beta_1 X_1^T Y - \hat \beta_0^T X_0^T Y$ & $\frac{\hat \beta_1 X_1^T Y - \hat \beta_0^T X_0^T Y}{p-q}$\\
+$\beta_1$ & & & \\
+Residual & n-p & $Y^T Y - \hat \beta_1^T X_1^TY$  & $\frac{Y^T Y - \hat \beta_1^T X_1^TY}{n-p}$\\
+\hline
+Total & n & $y^T y$ & \\
+\hline
+\end{tabular}
+\end{center}
+\label{default}
+\end{table}%
+
+In practical terms, you will be using the anova function to compare models. Example:
+
+<<>>=
+m1<-lm(Y~X[,2])
+m2<-lm(Y~X[,2]+X[,3])
+anova(m1,m2)
+summary(m)
+@
+
+Here, in m2 we have three $\beta$ parameters $\beta_0, \beta_1, \beta_2$, and we are testing the null hypothesis that the third parameter $\beta_2=0$. This test is with reference to the F-distribution, but the logic is the same as in the t-test and the likelihood ratio test. We compare the observed F-score with the distribution of the F-statistic under the null, which has an F-distribution with the appropriate degrees of freedom.
+
+\subsection{Checking model assumptions}
+
+This step is generally omitted by people, leading quite often to ridiculous models that get published and lead to major scientific errors. The main things to know here are: check the distribution of residuals, look for influential values, consider a Box-Cox transform to stabilize variance, check for multicollinearity.
+
+\section{Generalized Linear Models}
+
+Logistic regression is the most important and common model:
+
+\begin{equation}
+\log \frac{p}{1-p} = \beta_0 + \beta_1 \hbox{x}
+\end{equation}
+
+\begin{equation}
+p = \frac{\exp( \beta_0 + \beta_1 \hbox{x})}{1+\exp( \beta_0 + \beta_1 \hbox{x})}
+\end{equation}
+
+The inference theory remains the same as in linear models.
+
+\subsection{General form of the exponential family and the canonical link}
+
+\begin{equation} \label{genform}
+f(y; \theta_i, \phi)= \exp\left[\frac{y\theta_i - b(\theta_i)}{\phi/w}+c(y,\phi)\right]
+\end{equation}
+
+\begin{table}[!htbp]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+Distribution & $h(x_i^T \beta)=\mu_i$ & $g(\mu_i)=\theta_i$\\
+\hline
+Binomial & $\frac{\exp[\theta_i]}{1+\exp[\theta_i]}$ & $\log \frac{y}{1-y}$ \\
+logit link & & \\
+\hline
+Normal & $\theta$ & $g=h$ \\
+identity & & \\
+\hline
+Poisson & $\exp[\theta]$ & $\log[\mu]$ \\
+log & & \\
+\hline
+Gamma & $-\frac{1}{\theta}$ & $-\frac{1}{\mu_i}$\\
+inverse & & \\
+\hline
+Cloglog & $1-\exp[-\exp[\theta_i]]$ & $\log(-\log(1-\mu_i))$\\
+cloglog & & \\
+\hline
+Probit & $\Phi(\theta)$ & 
+$\Phi^{-1}(\theta)$ (qnorm)\\
+probit & & \\
+\hline
+\end{tabular}
+\end{table}
+
+\medskip
+The big thing about the canonical link is that is expresses $\theta_i$ as a linear combination of the parameters: $x_i^T \beta$.  You can decide which link to use by plotting $g(\mu_i)$ against the predictor (in case we have only a single predictor x). 
+
+\subsection{Assessing model fit and hypothesis testing in GLMs}
+
+\paragraph{Deviance for the binomial distribution} 
+
+Deviance is defined as $D=\sum d_i$, where:
+
+\begin{equation}
+d_i = -2 \times n_i [ y_i \log(\frac{\hat{\mu}_i}{y_i}) + (1-y_i) \log (\frac{1-\hat{\mu}_i}{1-y_i}) ]  
+\end{equation}
+
+The basic idea here is that if the model fit is good, Deviance will have a $\chi^2$ distribution with $N-p$ degrees of freedom.
+So that is what we will use for assessing model fit.
+
+We will also use deviance for hypothesis testing.
+The difference in deviance (residual deviance) between two models also has a $\chi_2$ distribution (this should remind you of ANOVA), with dfs being $p-q$, where $q$ is the number of parameters in the first model, and $p$ the number of parameters in the second.
+
+The anova function for glm does the implicit model comparison for you, delivering the residual deviance and the difference in degrees of freedom between the two models being compared, and the deviance of the model. So the anova function gives you all the output for doing inference and for evaluating model fit.
+
+
+
+\section{Linear mixed models}
+
+\subsection{Varying intercepts model}
+
+The model for a categorical predictor is:
+
+\begin{equation}
+Y_{ijk} = \beta_j + b_{i}+\epsilon_{ijk}
+\end{equation}
+
+\noindent
+$i=1,\dots,10$ is subject id, $j=1,2$ is the factor level, $k$ is the number of replicates (here 1).
+$b_i \sim N(0,\sigma_b^2), \epsilon_{ijk}\sim N(0,\sigma^2)$.
+
+For a continuous predictor:
+
+\begin{equation}
+Y_{ijk} = \beta_0 + \beta_1 t_{ijk} + b_{ij} +\epsilon_{ijk}
+\end{equation}
+
+
+\subsection{Varying intercepts and slopes (with correlation)}
+
+The model for a categorical predictor is:
+
+\begin{equation}
+Y_{ij} = \beta_1+b_{1i}+(\beta_2+b_{2i})x_{ij}+\epsilon_{ij} \quad i=1,...,M, j=1,...,n_i
+\end{equation}
+
+with $b_{1i}\sim N(0,\sigma_1^2), b_{2i}\sim N(0,\sigma_2^2)$, and $\epsilon_{ij}\sim N(0,\sigma^2)$.
+
+Another way to write such models is:
+
+\begin{equation}
+Y_{ijk} = \beta_j + b_{ij}+\epsilon_{ijk}
+\end{equation}
+
+\noindent
+$b_{ij}\sim N(0,\sigma_b)$. The variance $\sigma_b$ must be a $2\times 2$ matrix:
+
+\begin{equation}
+\begin{pmatrix}
+\sigma_1^2 & \rho \sigma_1 \sigma_2\\
+\rho \sigma_1 \sigma_2 & \sigma_2^2\\
+\end{pmatrix}
+\end{equation}
+
+You should be able to state what the random effects variance-covariance matrix is given model output.
+
+
+\end{document}
+
