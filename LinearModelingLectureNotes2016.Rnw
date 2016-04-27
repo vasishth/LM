@@ -19,7 +19,7 @@
 
 \usepackage{esint}
 
-\setcounter{secnumdepth}{2}% turn on numbering
+\setcounter{secnumdepth}{3}% turn on numbering
 
  
 \newcommand{\BlackBox}{\rule{1.5ex}{1.5ex}}
@@ -439,9 +439,51 @@ In the binomial case, $Var(X) = np(1-p)$.\footnote{Proof: see https://proofwiki.
 	E[X]= \int_{-\infty}^{\infty} x f(x) \, dx = \mu
 	\end{equation}
 
-  \begin{equation}
-	Var[X]= E[(X-\mu)^2]=E[X^2]-(E[X])^2
+The expectation of a function of $X$, $g(X)$:
+
+  \begin{equation} \label{eq:expfun}
+	E[g(X)]= \int_{-\infty}^{\infty} g(x) f(x) \, dx = \mu
 	\end{equation}
+
+The variance is defined as:
+
+  \begin{equation}
+	Var[X]= E[(X-E[X])^2]
+	\end{equation}
+
+An easier way to find the variance is through this equality:
+
+  \begin{equation}
+	Var[X]=E[X^2]-(E[X])^2  
+\end{equation}
+
+That is, to compute variance 
+we just need to find $E[X]$ and then $E[X^2]$.
+The proof of the above equality goes as follows:
+
+Let $E[X]=\mu$. By the definition of variance:
+
+  \begin{equation}
+	Var[X]= E[(X-E[X])^2]=E[(X-\mu)^2]
+	\end{equation}
+
+Expanding out the RHS:
+
+  \begin{equation}
+	Var[X]= E[(X-\mu)^2]= E[X^2-2\mu X + \mu^2]
+	\end{equation}
+
+By the linearity of expectation, we can rewrite this as:
+
+  \begin{equation}
+  \begin{split}
+	Var[X]=& E[X^2] -2\mu E[X] + \mu^2\\
+	=& E[X^2] - 2 \mu^2 + \mu^2 \\
+	=& E[X^2] - \mu^2\\
+	\end{split}
+	\end{equation}
+
+\hfill \BlackBox
 
 % to-do derive the above
 
@@ -491,14 +533,28 @@ We know that
 \hbox{Var}(X)=E[X^2]-(E[X])^2
 \end{equation*}
 
-Since $(E[X])^2=0$ (see immediately above), we have
+Since $(E[X])^2=0$ (see immediately above), we just have to compute $E[g(X)]=E[X^2]$. Here, we use the earlier definition, see Equation~\ref{eq:expfun}, of the expectation of a function of a random variable. 
 
 \begin{equation*}
 \hbox{Var}(X)=E[X^2] = 
-\frac{1}{\sqrt{2\pi}} \int_{-\infty}^\infty \explain{x^2}{\textrm{This is $Z^2$.}}  e^{-x^2/2}  \, dx
+\frac{1}{\sqrt{2\pi}} \int_{-\infty}^\infty \explain{x^2}{\textrm{This is g(X).}}  e^{-x^2/2}  \, dx
 \end{equation*}
 
-Write $x^2$ as $x\times x$ and use integration by parts:
+
+Write $x^2$ as $x\times x$ and use integration by parts:\footnote{Recall how integration by parts works: 
+
+\begin{equation}
+\frac{d(uv)}{dx} = u\frac{dv}{dx} + \int v\frac{du}{dx}
+\end{equation}
+
+\begin{equation}
+uv = \int u\frac{dv}{dx}\, dx + \int v\frac{du}{dx}\, dx 
+\end{equation}
+
+\begin{equation}\label{eq:intbyparts}
+\int u\frac{dv}{dx}\, dx = uv - \int v\frac{du}{dx}\, dx
+\end{equation}
+}
 
 \begin{equation*}
 \frac{1}{\sqrt{2\pi}} \int_{-\infty}^\infty 
@@ -573,7 +629,7 @@ Find E[X].
 E[X^n] = \int_0^\infty x^n \lambda e^{-\lambda x} \, dx	
 \end{equation*}
 
-Use integration by parts:
+Use integration by parts (see equation~\ref{eq:intbyparts} on page~\pageref{eq:intbyparts}):
 
 Let $u=x^n$, which gives $du/dx=n x^{n-1}$. Let $dv/dx= \lambda e^{-\lambda x}$, which gives
 $v = -e^{-\lambda x}$. Therefore:
@@ -621,7 +677,7 @@ When $\alpha=1$, we have the exponential distribution.
 \subsection{Gamma distribution}
 
 [The text is an amalgam of
- Kerns\cite{kerns} and Ross{RossProb}. I don't put it in double-quotes as a citation because it would look ugly.]
+ Kerns\cite{kerns} and Ross\cite{RossProb}. I don't put it in double-quotes as a citation because it would look ugly.]
 
 This is a generalization of the exponential distribution. We say that $X$ has a gamma distribution and write $X\sim\mathsf{gamma}(\mathtt{shape}=\alpha,\,\mathtt{rate}=\lambda)$, where $\alpha>0$ (called shape) and $\lambda>0$ (called rate). It has PDF
 
@@ -704,7 +760,7 @@ E[X] =& \frac{1}{\Gamma(\alpha)} \int_0^\infty x \lambda e^{-\lambda x} (\lambda
 \end{split}
 \end{equation*}
 
-(See derivation of $\Gamma(\alpha)$, p.\ 215  of \cite{RossProb}.)
+(See derivation of $\Gamma(\alpha)$, p.\ 215  of Ross\cite{RossProb}.)
 
 It is easy to show (exercise) that
 
@@ -1089,7 +1145,7 @@ $f_{X\mid Y}(x\mid y)\, dx$ amounts to:
 \begin{split}
 f_{X\mid Y}(x\mid y)\, dx =& \frac{f(x,y)}{f_Y(y)} \frac{dxdy}{dy}\\
 		=& \frac{f(x,y)dxdy}{f_Y(y)dy} \\
-		=& \frac{P(x<X<d+dx,y<Y<y+dy)}{y<P<y+dy}
+		=& \frac{P(x<X<d+dx,y<Y<y+dy)}{y<Y<y+dy}
 \end{split}	
 \end{equation}
 
@@ -1438,7 +1494,7 @@ Whenever we obtain some data, we make an assumption about the generative process
 %%to-do write somewhere that I use \sigma not \sigma^2
 $X \sim Normal(\mu,\sigma)$
 
-Once we've made this assumption, an obvious question arises: what should the values of $\mu$ and $\sigma$ be? MLE serves to provide a best guess. 
+Once we've made this assumption, an obvious question arises: what should the values of $\mu$ and $\sigma$ be? The MLEs serve to provide a best guess. 
 
 As an example, consider the eyetracking data I released earlier. For now we will remove 0 ms reading times from the data-set; for the moment, this can be considered missing data. 
 
@@ -1451,10 +1507,10 @@ As an example, consider the eyetracking data I released earlier. For now we will
 <<echo=FALSE>>=
 hindi10<-read.table("datacode/hindi10a.txt",header=T)
 
-colnames(hindi10)
-summary(hindi10$TFT)
+#colnames(hindi10)
+#summary(hindi10$TFT)
 hindi10<-subset(hindi10,TFT>0)
-summary(hindi10$TFT)
+#summary(hindi10$TFT)
 @
 
 A histogram reveals the following distribution of reading times on the log scale. It's a slight stretch, but we start with the guess that this is roughly a normal distribution:
@@ -1522,7 +1578,7 @@ nllh.normal(theta=c(40,4),log(hindi10$TFT))
 
 ## find the MLEs using optim:
 ## need to specify some starting values:
-opt.vals.default<-optim(theta<-c(500,50),
+opt.vals.default<-optim(theta<-c(5,.5),
                         nllh.normal,
       data=log(hindi10$TFT),
       hessian=TRUE)
@@ -1541,8 +1597,11 @@ sqrt(xvar)
 
 MLEs have the important property that they are asymptotically normally distributed. This means that if we repeatedly takes samples of data, and record the distribution of the sample mean, it will be normal if sample size is large enough, regardless of whether the underlying distribution we are sampling from is normal or not (this is assuming that the underlying distribution has a mean and variance defined for it---the Cauchy distribution does not, for example).
 
-To get an intuition about this, consider the situation where we repeatedly sample from an exponential distribution. Even though the underlying distribution is not normal, the distribution of the mean under repeated sampling is.
+To get an intuition about this, consider the situation where we repeatedly sample from an exponential distribution. Even though the underlying distribution is not normal (see Figure~\ref{fig:sampleexp}), the distribution of the mean under repeated sampling is.
+Or let's take some other distribution, say the uniform, see Figure~\ref{fig:sampleunif}.
 
+
+\begin{figure}[!htbp]
 <<sampleexp,fig.width=6>>=
 n_rep<-1000
 samp_distrn_mean<-rep(NA,n_rep)
@@ -1552,13 +1611,16 @@ samp_distrn_mean[i]<-mean(x)
 }
 
 op<-par(mfrow=c(1,2),pty="s")
-hist(x,xlab="x",ylab="density",freq=FALSE,main="Exponentially distributed data")
+hist(x,xlab="x",ylab="density",freq=FALSE,
+     main="Exponentially distributed \n data")
 hist(samp_distrn_mean,xlab="x",ylab="density",freq=FALSE,
-     main="Sampling distribution of mean")
+     main="Sampling distribution \n of mean")
 @
+\caption{Sampling from exponential.}\label{fig:sampleexp}
+\end{figure}
 
-Let's take some other even wilder distribution, say the uniform:
 
+\begin{figure}[!htbp]
 <<sampunif,fig.width=6>>=
 n_rep<-1000
 samp_distrn_mean<-rep(NA,n_rep)
@@ -1568,10 +1630,13 @@ samp_distrn_mean[i]<-mean(x)
 }
 
 op<-par(mfrow=c(1,2),pty="s")
-hist(x,xlab="x",ylab="density",freq=FALSE,main ="Sampling from uniform")
+hist(x,xlab="x",ylab="density",freq=FALSE,
+     main ="Sampling from uniform")
 hist(samp_distrn_mean,xlab="x",ylab="density",freq=FALSE,
      main="Sampling from uniform")
 @
+\caption{Sampling from uniform.}\label{fig:sampleunif}
+\end{figure}
 
 We will now look at this asymptotic property of the distribution of the sample means analytically.
 
@@ -2218,9 +2283,60 @@ We can compute it by hand using the CDF of the normal or t-distribution (there a
 @
 
 Because the conditional probability (the p-value) is essentially zero, 
-we feel entitled to reject the null hypothesis that $\beta_0=0$. Rejecting this null hypothesis implies that $\beta_0\neq 0$. Note that Gelman and Hill go to some trouble to get rid of the t-value and p-value; this is because at least Gelman doesn't think much of this null hypothesis testing business, with good reason---the p-value has probably caused more harm to science than any other statistical construct. 
+we feel entitled to reject the null hypothesis that $\beta_0=0$. Rejecting this null hypothesis implies that we conclude that $\beta_0\neq 0$. 
 
-The p-value is widely misunderstood, even by veteran scientists.  Please read our review article \cite{VasishthNicenboimStatMeth} for more details.
+One important fact to remember is that when we do a statistical test and obtain a p-value, if the null hypothesis is in fact true, then the distribution of the p-value under repeated sampling is Uniform(0,1).  We prove this below. 
+
+The significance of this fact is that a low p-value from a single experiment doesn't necessarily tell us anything useful; if the null is true (and we can't be sure it isn't), then this p-value is coming from a uniform distribution, i.e., every value between 0 and 1 has the same likelihood. A low p-value isn't anything special in this situation. 
+
+\paragraph{The distribution of the p-value under the null hypothesis is Uniform(0,1)}
+
+Notice that when a random variable Z comes from a Uniform(0,1) distribution, then 
+$P(Z<z)=z$. Consider some examples:
+
+\begin{enumerate}
+\item
+when $z=0$, then $P(Z<0)=0$;
+\item
+when $z=0.25$, then $P(Z<0.25)=0.25$; 
+\item
+when $z=0.5$, then $P(Z<0.5)=0.5$; 
+\item
+when $z=0.75$, then $P(Z<0.75)=0.75$; 
+\item
+when $z=1$, then $P(Z<1)=1$. 
+\end{enumerate}
+
+With this background, we prove the following proposition:
+
+\begin{proposition}
+If a random variable $Z=F(T)$, i.e., if $Z$ is the 
+CDF for a random variable $T$, then $Z \sim Uniform(0,1)$.
+\end{proposition}
+
+Note here that the p-value is a random variable, call it $Z$. The p-value is the CDF of the random variable $T$ that is a transformation of the random variable $\bar{X}$: $T=(\bar{X}-\mu)/(\sigma/\sqrt{n})$. This random variable has a CDF $F(T)$.
+
+So, if we can prove the above proposition, we have shown that the p-value's distribution under the null hypothesis is $Uniform(0,1)$. 
+
+\textbf{Proof}: 
+
+Let $Z=F(T)$.
+
+\begin{equation}
+\begin{split}
+P(Z\leq z) =& P(F(T)\leq z)\\
+=& P(Z\leq F^{-1}(z) ) \\
+=& F(F^{-1} (z))\\
+=& z\\
+\end{split}
+\end{equation}
+
+\hfill \BlackBox
+
+Please read our review article \cite{VasishthNicenboimStatMeth} for more discussion on p-values.
+
+
+\paragraph{Type I and II errors, Type S and M errors}
 
 In frequentist statistics, we can also compute Type I and Type II error rates. Type I error is the probability of incorrectly rejecting the null (when it's actually true); this is typically set at $0.05$ by the researcher and is called the $\alpha$ value.  Type II error is defined as the probability of incorrectly ``accepting'' (more accurately, failing to reject) the null hypothesis when it's false. (1-Type II) error is called power, and is the probability of correctly rejecting the null.\footnote{Note that all our definitions here are with respect to the null hypothesis---it is a mistake to think that Type II error is the probability of failing to accept the alternative hypothesis when it's true. We can only ever reject or not reject the null; our hypothesis test is always with reference to the null.}
 
@@ -2325,15 +2441,20 @@ The practical implication of this result is huge. From a \textit{single} sample 
 Note that I was careful above to not stipulate that X is normally distributed. As discussed in section~\ref{asymptotic}, one amazing fact is that, as long as X has an expectation and variance defined for it, the sampling distribution of the sample mean $\bar{X}$ will have a normal distribution if sample size $n$ is large enough.
 This statement is called the Central Limit Theorem (see page 267 of Freund's Mathematical Statistics\cite{millermiller} for a proof), which I will write compactly as:
 
+\begin{theorem}
+
+Central Limit Theorem
+
 \begin{equation}
 \bar{X} \sim N(\mu,\sigma^2/n) \quad X \sim f(X), E[X]=\mu,Var(X)=\sigma^2 \quad n \hbox{ large}
 \end{equation}
+\end{theorem}
 
 In our linear model example above, the variance estimate of $\beta$ is an estimate of $\sigma^2/n$. This is the square of the standard error ($\sigma/\sqrt{n}$). Make sure you distinguish it from the standard deviation $\sigma$; note that $\sigma/\sqrt{n}$  is also a standard deviation, but it's the standard deviation of the sampling distribution of the sample mean.
 
 \subsection{Hypothesis testing using the likelihood ratio}
 
-Suppose now that we have some data $x_1,\dots, x_n$ from a random variable X whose distribution depends on the parameter $\theta$. Suppose also that we want to test a hypothesis $H_0$ against $H_1$. 
+Suppose now that we have some data $x_1,\dots, x_n$ from a random variable X\footnote{I will hereafter assume that data are iid unless stated otherwise.} whose distribution depends on the parameter $\theta$. Suppose also that we want to test a hypothesis $H_0$ against $H_1$. 
 
 Define the \textbf{likelihood ratio test statistic} as follows. Here, $L(\theta)$ refers to the likelihood given some values of $\theta$, and 
 $\ell(\theta)$ refers to the log likelihood.
@@ -2415,7 +2536,7 @@ summary(m1)$coefficients[2,3]
 
 This is because $t^2 = F$. The proof is discussed on page 9 of the Dobson and Barnett book.
 
-The ANOVA works as follows.  First define the residual as:
+The ANOVA works as follows.  First define the residual as:\footnote{Note that I do not use $\epsilon$ here, but e, to refer to the residual. This is because these are the estimates of $\epsilon$ derived from the estimates $\hat\beta$.}
 
 \begin{equation}
 e = Y - X\hat\beta
@@ -2544,7 +2665,9 @@ $R^2$ is defined as follows:
 R^2 = \frac{\hat S_0 - \hat S}{\hat S_0} = \frac{\hat \beta X^T Y - n\bar{y}^2}{Y^TY - n\bar{y}^2}
 \end{equation}
 
-The interpretation of $R^2$ is the proportion of variance explained by the model. Note that $R^2$ always increases if predictors are added, so an adjustment is made, called adjusted $R^2$:
+The interpretation of $R^2$ is 
+that it represents
+the proportion of variance explained by the model. Note that $R^2$ always increases if predictors are added, so an adjustment is made, called adjusted $R^2$:
 
 \begin{equation}
 R_{Adj}^2= 1-\frac{( (Y - X\hat \beta)^T (Y - X\hat \beta))/(n-p)}{(Y^TY - n\bar{y}^2)/(n-1)}
@@ -2808,7 +2931,7 @@ Here is how to do it by hand:
 
 Since $f_\lambda=\frac{y^\lambda-1}{\lambda}$, it follows that $f'_\lambda(y)= y^{\lambda-1}$.
 
-Now, for different $\lambda$ you can figure out the log likelihoods by hand by solving this equation (remember that this is for a specific data-set and model, i.e., we are given $y$ and can compute $S_\lambda$:
+Now, for different $\lambda$ you can figure out the log likelihoods by hand by solving this equation (remember that this is for a specific data-set and model, i.e., we are given $y$ and can compute $S_\lambda$):
 
 \begin{equation}
 \ell = c-\frac{n}{2} \log \explain{S_\lambda}{\hbox{Residual sum of squares}} + (\lambda-1)\sum \log (y_i)
