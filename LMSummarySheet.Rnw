@@ -221,7 +221,7 @@ We can compute MLEs and SEs of $\beta$ using these matrix results:
 \end{equation}
 
 \begin{equation}\label{vcovmatrixformula}
-Var(\beta)= \sigma^2 [(X^TX)^{-1}]
+Var(\hat\beta)= \sigma^2 [(X^TX)^{-1}]
 \end{equation}
 
 
@@ -383,7 +383,7 @@ The test has a logic similar to the t-test. If the estimate of $\lambda$ is high
 
 Here, we compute the F-ratio, which is the ratio of between group variance to within-group variance. The basic calculations are summarized below:
 
-\begin{table}[htdp]
+\begin{table}[!htbp]
 \caption{default}
 \begin{center}
 \begin{tabular}{|c|c|c|c|}
