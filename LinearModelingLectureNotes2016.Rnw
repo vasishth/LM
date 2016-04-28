@@ -2317,6 +2317,7 @@ CDF for a random variable $T$, then $Z \sim Uniform(0,1)$.
 Note here that the p-value is a random variable, call it $Z$. The p-value is the CDF of the random variable $T$ that is a transformation of the random variable $\bar{X}$: $T=(\bar{X}-\mu)/(\sigma/\sqrt{n})$. This random variable has a CDF $F(T)$.
 
 So, if we can prove the above proposition, we have shown that the p-value's distribution under the null hypothesis is $Uniform(0,1)$. 
+The proof is actually really amazing; it's called the \textbf{probability integral transform}.
 
 \textbf{Proof}: 
 
@@ -2325,7 +2326,8 @@ Let $Z=F(T)$.
 \begin{equation}
 \begin{split}
 P(Z\leq z) =& P(F(T)\leq z)\\
-=& P(Z\leq F^{-1}(z) ) \\
+=& P(F^{-1}F(T)\leq F^{-1}(z))\\
+=& P(T\leq F^{-1}(z) ) \\
 =& F(F^{-1} (z))\\
 =& z\\
 \end{split}
