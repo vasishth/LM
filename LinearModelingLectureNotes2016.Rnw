@@ -335,7 +335,7 @@ P\{a - \frac{\epsilon}{2} \leq X \leq a + \frac{\epsilon}{2} \} = \int_{a - \eps
 
 when $\epsilon$ is small and when $f(\cdot)$ is continuous. I.e., $\epsilon f(a)$ is the approximate probability that $X$ will be contained in an interval of length $\epsilon$ around the point $a$.
 
-\subsection{Example 1: Normal random variable}
+\subsection{Example: Normal random variable}
 
 \begin{equation}
 f_{X}(x)=\frac{1}{\sigma\sqrt{2\pi}}e^{ \frac{-(x-\mu)^{2}}{2\sigma^{2}}},\quad -\infty < x < \infty.
@@ -453,7 +453,7 @@ The variance is defined as:
 
 An easier way to find the variance is through this equality:
 
-  \begin{equation}
+  \begin{equation} \label{varianceequation}
 	Var[X]=E[X^2]-(E[X])^2  
 \end{equation}
 
@@ -576,9 +576,9 @@ Therefore, the variance of the standard normal density equals 1.''
 %\textbf{Example}:	
 %Given N(10,16), write distribution of $\bar{X}$, where $n=4$. Since $SE=sd/sqrt(n)$, the distribution of $\bar{X}$ is $N(10,4/\sqrt{4}$).
 
-\chapter{Probability distributions}
+\chapter{Some useful probability distributions}
 
-\section{Some useful continuous distributions}
+%\section{Some useful continuous distributions}
 %%to-do: give examples from real life of each distrn.
 
 \subsection{Exponential random variables}
@@ -1450,13 +1450,100 @@ The first formula for the variance leads to a biased estimator, and the second o
 Some definitions are in order.
 
 \begin{definition}
-\textbf{Unbiasedness}:
-This is a property of the estimator. An estimator is unbiased when it gives the correct result on average (under repeated sampling). If you want to estimate $\theta$, then the expectation of the estimator $E[\hat\theta]=\theta$. 
-
-If the estimator is not unbiased, the difference between its mean and the population quantity is the bias: Bias= $E[\hat\theta]-\theta$.
+\textbf{Estimator}: A point estimator\footnote{Note that an \textbf{estimate} is different from an estimator. An estimate is the realized value of the estimator when an actual sample is taken.  So, in the following proof, note that the estimator is a function of random variables $X_1,\dots,X_n$ (written as capital $X$'s), whereas the corresponding estimate would be a function of the actually sampled values $x_1,\dots,x_n$ (lower case $x$).
+} 
+(such as $\hat\mu$ and $\hat\sigma^2$) is any function $f(X_1,\dots,X_n)$ of a sample. I.e., any statistic is a point estimator.
 \end{definition}
 
-%to-do: give example of bias induced in variance
+
+
+\begin{definition}
+\textbf{Bias}:
+The bias of a point estimator $\hat \theta$ of a parameter $\theta$ is the difference between the expected value of W and $\theta$.
+That is, Bias= $E[\hat\theta]-\theta$
+\end{definition}
+
+
+\paragraph{Expectation of $X^2$}
+
+Recall (equation~\ref{varianceequation}, page~\pageref{varianceequation}) that for a random variable $X$ with $E[X]=\mu$ and $Var(X)=\sigma^2$:
+
+\begin{equation}
+\sigma^2= Var(X) = E[X^2] - E[X]^2 = E[X^2] - \mu^2
+\end{equation}
+
+It follows that
+
+\begin{equation}
+E[X^2]  = \mu^2 + \sigma^2
+\end{equation}
+
+By a similar logic, for the sampling distribution of X, $E[\bar{X}] = \mu$ and $Var(\bar{X})=\sigma^2/n$ (see equation~\ref{sdsmderivation}, page~\pageref{sdsmderivation}). It follows that:
+
+\begin{equation}
+E[\bar{X}^2]  = \mu^2 + \frac{\sigma^2}{n}
+\end{equation}
+
+
+\paragraph{Proof that $\hat\sigma^2$ is biased}
+
+Now, we can proceed to show that the \textbf{estimator} $\hat\sigma^2$, defined below, of $\sigma^2$ is biased.  Recall the definition of this estimator: given random variables $X_1,\dots,X_n$, which come from $N(\mu,\sigma^2)$, we can estimate $\sigma^2$ by computing:
+
+\begin{equation}
+\hat\sigma^2 = \frac{\sum_{i=1}^n (X_i - \bar{X})^2}{n}
+\end{equation}
+
+For this estimator to be \textbf{unbiased}, it would have to be the case that $E[\hat\sigma^2] = \sigma^2$. So it's enough to show that this equality doesn't hold. We prove this below.
+
+\begin{equation}
+\begin{split} \label{exp}
+E[\hat\sigma^2] =& E\left[\frac{\sum_{i=1}^n (X_i - \bar{X})^2}{n}\right]\\
+=&  \frac{1}{n} E\left[\sum_{i=1}^n (X_i - \bar{X})^2\right] \hbox{ (taking the constant term out)}\\
+\end{split}
+\end{equation}
+
+Now, notice that expanding out the summation of the squared term gives us:
+
+\begin{equation}
+\begin{split}
+\sum_{i=1}^n (X_i - \bar{X})^2 =& \sum_{i=1}^n  (X_i^2 - 2  X_i \bar{X} + \bar{X}^2) \\
+ =& \sum_{i=1}^n  X_i^2 - 2\sum_{i=1}^n  X_i \bar{X} + n\bar{X}^2\\
+\end{split}
+\end{equation}
+
+\marginnote{One useful thing to remember is that whenever you see $\sum_{i=1}^n X_i$, this term can be rewritten as: 
+
+\begin{equation}
+\sum_{i=1}^n X_i =  n \frac{\sum_{i=1}^n X_i}{n}= n \bar{X}
+\end{equation}
+} 
+
+Rewriting $\sum_{i=1}^n X_i$ as $n \bar{X}$,
+
+\begin{equation}
+\begin{split}
+\sum_{i=1}^n  X_i^2 - 2\sum_{i=1}^n  X_i \bar{X} + n\bar{X}^2 =& \sum_{i=1}^n  X_i^2 - 2n \bar{X} \bar{X} + n\bar{X}^2\\
+=& \sum_{i=1}^n  X_i^2 - 2n \bar{X}^2 + n\bar{X}^2\\
+=& \sum_{i=1}^n  X_i^2 - n \bar{X}^2\\
+\end{split}
+\end{equation}
+
+Now, equation~\ref{exp} can be written as:
+
+\begin{equation}
+\begin{split} \label{exp2}
+E[\hat\sigma^2]  =&  \frac{1}{n} E\left[\sum_{i=1}^n (X_i - \bar{X})^2\right] \\
+=& \frac{1}{n} E\left[\sum_{i=1}^n  X_i^2 - n \bar{X}^2\right]\\
+=& \frac{1}{n} \left[n E[X^2] - n E[\bar{X}^2]\right]\\
+=& \frac{1}{n} \left[n (\sigma^2 + \mu^2) - n (\frac{\sigma^2}{n} + \mu^2)\right]\\
+=& \frac{1}{n} \left[(n-1)\sigma^2\right]\\
+=& \frac{n-1}{n} \sigma^2\\
+\end{split}
+\end{equation}
+
+So, $E[\hat\sigma^2]  =  \frac{n-1}{n} [\sigma^2]$. That is, it is a biased estimator. It is clear how to make this estimator unbiased: divide by $n-1$ instead of $n$.
+
+Notice that large $n$, dividing by $n$ or $n-1$ isn't going to make much difference. 
 
 \subsection{Example 3: MLE of the Exponential distribution}
 
@@ -2423,7 +2510,7 @@ X_n)\\
 
 Now, $X_1,\dots,X_n$ are independent. We will use the fact that the variance of the sum of independent RVs is the sum of their variances. (If they were not independent, then the variance of the sum would have to take covariance between the X's into account; more on this later). This gives us:
 
-\begin{equation}
+\begin{equation} \label{sdsmderivation}
 \begin{split}
 \frac{1}{n^2} Var(X_1 + \dots + X_n) =& \frac{1}{n^2} (Var(X) + \dots + Var(X))\\
 =&  \frac{1}{n^2}  n Var(X)\\
@@ -3125,7 +3212,7 @@ The likelihood function of the exponential family's distributions can be written
 f(y; \theta_i, \phi)= \exp\left[\frac{y\theta_i - b(\theta_i)}{\phi/w}+c(y,\phi)\right]
 \end{equation}
 
-\paragraph{Example 1: The normal distribution}
+\paragraph{Example: The normal distribution}
 
 Consider the normal distribution. We can write it in the general form of equation~\ref{genform}.
 
