@@ -1279,8 +1279,6 @@ If $Y$ is a discrete random variable, then the above proposition states that
 E[X] = \underset{y}{\overset{}{\sum}} E[X\mid Y = y] P(Y=y)	
 \end{equation}
 
-
-
 \chapter{Maximum Likelihood Estimation}
 
 \section{Introduction to Maximum Likelihood Estimation}
@@ -1547,6 +1545,7 @@ Notice that large $n$, dividing by $n$ or $n-1$ isn't going to make much differe
 
 \subsection{Example 3: MLE of the Exponential distribution}
 
+Here, when I write $x$, I mean a vector of data points $x_1,\dots, x_n$. And when I write $\sum$ I mean $\sum_{i=1}^n$.
 
 \begin{equation}
   f(x; \lambda)= \lambda \exp (- \lambda x)
@@ -1682,7 +1681,7 @@ sqrt(xvar)
 
 \section{Asymptotic properties of MLEs} \label{asymptotic}
 
-MLEs have the important property that they are asymptotically normally distributed. This means that if we repeatedly takes samples of data, and record the distribution of the sample mean, it will be normal if sample size is large enough, regardless of whether the underlying distribution we are sampling from is normal or not (this is assuming that the underlying distribution has a mean and variance defined for it---the Cauchy distribution does not, for example).
+MLEs have the important property that they are asymptotically normally distributed. This means that if we repeatedly takes samples of data, and record the distribution of the sample mean, the distribution will be normal if sample size is large enough, regardless of whether the underlying distribution we are sampling from is normal or not (this is assuming that the underlying distribution has a mean and variance defined for it---the Cauchy distribution does not, for example).
 
 To get an intuition about this, consider the situation where we repeatedly sample from an exponential distribution. Even though the underlying distribution is not normal (see Figure~\ref{fig:sampleexp}), the distribution of the mean under repeated sampling is.
 Or let's take some other distribution, say the uniform, see Figure~\ref{fig:sampleunif}.
@@ -2070,8 +2069,6 @@ The \textbf{general linear model} is a non-deterministic function like the one a
 Y=f(x)^T\beta +\epsilon 
 \end{equation}
 
-The function $f(x)^T=(f_1(x)~f_1(x)\dots f_p(x))$ is a row vector of known functions of x.
-
 The matrix formulation will be written as below. $n$ refers to the number of data points (that is, $Y_1,\dots,Y_n$), and the index $j$ ranges from $1$ to $n$.
 
 \begin{equation}
@@ -2101,7 +2098,10 @@ Y =& X \beta + \epsilon \\
 \end{split}
 \end{equation}
 
-Here, $f(x_1)^T = (1~x_1)$, and is the first row of the matrix $X$, and so on.
+Here, $f(x_1)^T = (1~x_1)$, and is the first row of the matrix $X$, 
+$f(x_2)^T = (1~x_2)$ is the second row, and 
+$f(x_3)^T = (1~x_3)$ is the third row.
+
 Note that $E[Y]=X\beta$.  $\beta$ is a $p\times 1$ matrix, and X, the \textbf{design matrix}, is $n\times p$.\footnote{In this example with three data points, if the model had been 
 
 $y= \beta_0 + \beta_1 x + \beta_2 x^2$
@@ -2112,7 +2112,7 @@ what would each row of $f(x)^T$ look like?
 
 \subsection{Least squares estimation: Geometric argument}
 
-When we have a deterministic model  $y=\phi(f(x),\beta)=\beta_0+\beta_1x$, this implies a perfect fit to all data points. 
+When we have a deterministic model  $y=\phi(f(x)^T,\beta)=\beta_0+\beta_1x$, this implies a perfect fit to all data points. 
 This is like solving the equation $Ax=b$ in linear algebra: we solve for $\beta$ in $X\beta=y$ using, e.g., Gaussian elimination.
 When we have a non-deterministic model 
 $y=\phi(f(x)^T,\beta,\epsilon)$, there is no solution. Now, the best we can do is to get $Ax$ to be as close an approximation as possible to b in $Ax=b$. In other words, we try to minimize $\mid b-Ax\mid$. 
@@ -2201,14 +2201,14 @@ Some consequences of the above statements:
 \item $Var(Y)=\sigma^2 I_n$
 \end{enumerate}
 
-We can now derive the expectation and variance of the vector $\beta$. We need a fact about variances: $Var(aB)$, where a is a constant, is $a^2 Var(B)$. In the matrix setting, Var(AB), where A is a constant, is $A Var(B)A^T$.
+We can now derive the expectation and variance of the estimators $\hat\beta$. We need a fact about variances: $Var(aB)$, where a is a constant, is $a^2 Var(B)$. In the matrix setting, Var(AB), where A is a constant, is $A Var(B)A^T$.
 
 \begin{equation}
 E[\hat\beta] = E[(X^TX)^{-1}X^T Y] = (X^TX)^{-1}X^T X\beta = \beta
 \end{equation}
 
 \noindent
-Notice that the above shows that $\hat\beta$ is an unbiased estimate of $\beta$.
+Notice that the above shows that $\hat\beta$ is an unbiased estimator of $\beta$.
 
 Next, we compute the variance:
 
@@ -2259,10 +2259,10 @@ X<-model.matrix(m0)
 head(X,n=4)
 ## (X^TX)^{-1}
 invXTX<-solve(t(X)%*%X)
-## estimated beta:
+## estimate of beta:
 (beta<-invXTX%*%t(X)%*%y)
 
-## estimated variance of beta:
+## estimated variance (se^2) of the estimate of beta:
 (hat_sigma<-summary(m0)$sigma)
 (hat_var<-hat_sigma^2*invXTX)
 @
@@ -2333,7 +2333,7 @@ An alternative version of the test is:
 \end{equation}
 
 The t-value refers to the fact that we are using an approximation of N(0,1), the t-distribution with $n-1$ degrees of freedom. 
-For small sample sizes (say $n<18$), the use of the t-distribution rather than the normal has important consequences because the t-distribution for such small n has fatter tails than the normal---more probability mass is located in the tails of the t-distribution than in the normal. For larger sample sizes, the normal and t-distribution are essentially indistinguishable. We can visualize this difference between the t-distribution and normal distribution quite easily.
+For small sample sizes (say $n<18$), the use of the t-distribution rather than the normal has important consequences because the t-distribution for such small n has somewhat fatter tails than the normal---slightly more probability is concentrated in the tails of the t-distribution than in the normal. For larger sample sizes, the normal and t-distribution are essentially indistinguishable. We can visualize this difference between the t-distribution and normal distribution quite easily.
 
 <<tvsnormal,fig.width=6>>=
 range <- seq(-4,4,.01)  
@@ -2480,7 +2480,7 @@ An important detail about the above Wald test or statistic is that it that the n
 
 Suppose I gather independent and identically distributed data $x_1, \dots, x_n$, each of which is generated by a random variable X.
 
-For each sample, suppose I compute the mean $\bar{x}$. Now, $\bar{X}$ is also a random variable; it is just a linear combination of values generated by instances of the random variable X, which, we will assume, has some mean (expectation) $\mu$ and some variance $\sigma^2$: 
+For each sample, suppose I compute the mean $\bar{x}$. Now, the estimator $\bar{X}$ is also a random variable; it is just a linear combination of values generated by instances of the random variable X, which, we will assume, has some mean (expectation) $\mu$ and some variance $\sigma^2$: 
 
 \begin{equation}
 \bar{X}=\frac{1}{n} \sum_{i=1}^n X = \frac{1}{n}X_1 + \dots + \frac{1}{n}X_n
@@ -2533,6 +2533,8 @@ This statement is called the Central Limit Theorem (see page 267 of Freund's Mat
 \begin{theorem}
 
 Central Limit Theorem
+
+Let $f(X)$ be the pdf of a random variable X, and assume that the pdf has mean $\mu$ and variance $\sigma^2$. Then:
 
 \begin{equation}
 \bar{X} \sim N(\mu,\sigma^2/n) \quad X \sim f(X), E[X]=\mu,Var(X)=\sigma^2 \quad n \hbox{ large}
