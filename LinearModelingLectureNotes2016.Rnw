@@ -1457,7 +1457,7 @@ Some definitions are in order.
 
 \begin{definition}
 \textbf{Bias}:
-The bias of a point estimator $\hat \theta$ of a parameter $\theta$ is the difference between the expected value of W and $\theta$.
+The bias of a point estimator $\hat \theta$ of a parameter $\theta$ is the difference between the expected value of $\hat\theta$ and $\theta$.
 That is, Bias= $E[\hat\theta]-\theta$
 \end{definition}
 
@@ -1883,7 +1883,7 @@ Here, the asymptotic distribution of $\hat \mu$ and $\hat \sigma^2$ is:\footnote
 N\left(
 \begin{pmatrix}
  \mu \\
- \sigma\\
+ \sigma^2\\
 \end{pmatrix},
 \begin{pmatrix}
  \frac{\sigma^2}{n} & 0\\
