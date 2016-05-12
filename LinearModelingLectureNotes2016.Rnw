@@ -985,6 +985,65 @@ P(a<X<a+da,b<Y<b+db)=\int_b^{d+db}\int_a^{a+da} f(x,y)\, dx\, dy \approx f(a,b) 
 
 Hence, $f(x,y)$ is a measure of how probable it is that the random vector $(X,Y)$ will be near $(a,b)$.
 
+\paragraph{Example: Bivariate normal distribution}
+
+
+If we have two independent random variables U0, U1, and we examine their joint distribution, we can plot a 3-d plot which shows, u0, u1, and f(u0,u1). E.g., 
+
+\begin{equation}
+f(u0,u1) \sim \left(N\left(
+\begin{pmatrix}
+0\\
+0\\ 
+\end{pmatrix}
+,
+\begin{pmatrix}1 & 0\\ 
+0 & 1\\ 
+\end{pmatrix}\right)\right)
+\end{equation}
+
+See Figure~\ref{fig:biv1}.
+
+
+\begin{marginfigure}
+<<echo=FALSE,fig.height=6,cache=TRUE>>=
+library(mvtnorm)
+u0 <- u1 <- seq(from = -3, to = 3, length.out = 30)
+Sigma1<-diag(2)
+f <- function(u0, u1) dmvnorm(cbind(u0, u1), mean = c(0, 0),sigma = Sigma1)
+z <- outer(u0, u1, FUN = f)
+persp(u0, u1, z, theta = -30, phi = 30, ticktype = "detailed")
+@
+\caption{Bivariate normal distribution with no correlation.}\label{fig:biv1}
+\end{marginfigure}
+
+If the random variables had been correlated positively, with correlation $0.6$ say, we would get 
+Figure~\ref{fig:biv2}.
+If the random variables had been correlated negatively, with correlation $-0.6$ say, we would get 
+Figure~\ref{fig:biv3}.
+
+\begin{marginfigure}
+<<echo=FALSE,fig.height=6,cache=TRUE>>=
+Sigma2<-matrix(c(1,.6,.6,1),byrow=FALSE,ncol=2)
+f <- function(u0, u1) dmvnorm(cbind(u0, u1), mean = c(0, 0),sigma = Sigma2)
+z <- outer(u0, u1, FUN = f)
+persp(u0, u1, z, theta = -30, phi = 30, ticktype = "detailed")
+@
+\caption{Bivariate normal with positive correlation.}\label{fig:biv2}
+\end{marginfigure}
+
+\begin{marginfigure}
+<<echo=FALSE,fig.height=6,cache=TRUE>>=
+Sigma3<-matrix(c(1,-.6,-.6,1),byrow=FALSE,ncol=2)
+f <- function(u0, u1) dmvnorm(cbind(u0, u1), mean = c(0, 0),sigma = Sigma3)
+z <- outer(u0, u1, FUN = f)
+persp(u0, u1, z, theta = -30, phi = 30, ticktype = "detailed")
+@
+\caption{Bivariate normal with negative correlation.}\label{fig:biv3}
+\end{marginfigure}
+
+
+
 \subsection{Marginal probability distribution functions}\label{marginalpdfs}
  
 If X and Y are jointly continuous, they are individually continuous, and their PDFs are:
@@ -1145,7 +1204,7 @@ $f_{X\mid Y}(x\mid y)\, dx$ amounts to:
 \begin{split}
 f_{X\mid Y}(x\mid y)\, dx =& \frac{f(x,y)}{f_Y(y)} \frac{dxdy}{dy}\\
 		=& \frac{f(x,y)dxdy}{f_Y(y)dy} \\
-		=& \frac{P(x<X<d+dx,y<Y<y+dy)}{y<Y<y+dy}
+		=& \frac{P(x<X<d+dx,y<Y<y+dy)}{P(y<Y<y+dy)}
 \end{split}	
 \end{equation}
 
@@ -2372,11 +2431,13 @@ We can compute it by hand using the CDF of the normal or t-distribution (there a
 Because the conditional probability (the p-value) is essentially zero, 
 we feel entitled to reject the null hypothesis that $\beta_0=0$. Rejecting this null hypothesis implies that we conclude that $\beta_0\neq 0$. 
 
-One important fact to remember is that when we do a statistical test and obtain a p-value, if the null hypothesis is in fact true, then the distribution of the p-value under repeated sampling is Uniform(0,1).  We prove this below. 
+One important fact to remember is that when we do a two-sided statistical test assuming a continuous random variable, and obtain a p-value, if the point null hypothesis $H_0: \mu = 0$ is in fact true, then the distribution of the p-value under repeated sampling is Uniform(0,1).  We prove this below. 
 
 The significance of this fact is that a low p-value from a single experiment doesn't necessarily tell us anything useful; if the null is true (and we can't be sure it isn't), then this p-value is coming from a uniform distribution, i.e., every value between 0 and 1 has the same likelihood. A low p-value isn't anything special in this situation. 
 
 \paragraph{The distribution of the p-value under the null hypothesis is Uniform(0,1)}
+
+[Here I assume that we are talking about a continuous random variable, and are doing the standard two-sided statistical test, with a point null hypothesis.]
 
 Notice that when a random variable Z comes from a Uniform(0,1) distribution, then 
 $P(Z<z)=z$. Consider some examples:
@@ -2545,34 +2606,126 @@ In our linear model example above, the variance estimate of $\beta$ is an estima
 
 \subsection{Hypothesis testing using the likelihood ratio}
 
-Suppose now that we have some data $x_1,\dots, x_n$ from a random variable X\footnote{I will hereafter assume that data are iid unless stated otherwise.} whose distribution depends on the parameter $\theta$. Suppose also that we want to test a hypothesis $H_0$ against $H_1$. 
+Define the likelihood ratio statistic as:
 
-Define the \textbf{likelihood ratio test statistic} as follows. Here, $L(\theta)$ refers to the likelihood given some values of $\theta$, and 
+\begin{definition}
+\textbf{Likelihood ratio test statistic}
+
+\begin{equation}
+\Lambda = \frac{max_{\theta\in \omega_0}(lik(\theta)}{max_{\theta\in \omega_1)}(lik(\theta))}
+\end{equation}
+
+\noindent
+where, $\omega_0=\{\mu_0\}$ and $\omega_1=\{\forall \mu \mid \mu\neq \mu_0\}$.
+
+\end{definition}
+
+Suppose that $X_1,\dots, X_n$ are iid and normally distributed with mean $\mu$ and standard deviation $\sigma$ (assume for simplicity that $\sigma$ is known). 
+
+Let the null hypothesis be $H_0: \mu=\mu_0$ and the alternative be $H_1: \mu\neq \mu_0$. Here, $\mu_0$ is a number, such as $0$.
+Now, the numerator of the likelihood ratio statistic is:
+
+\begin{equation}
+\frac{1}{(\sigma\sqrt{2\pi})^n} 
+           \exp\left( -\frac{1}{2\sigma^2} \sum_{i=1}^n (X_i - \mu_0)^2  \right)
+\end{equation}
+
+For the denominator, the maximum likelihood can be achieved by specifying the MLE $\bar{X}$ as $\mu$:
+
+\begin{equation}
+\frac{1}{(\sigma\sqrt{2\pi})^n} 
+           \exp\left( -\frac{1}{2\sigma^2} \sum_{i=1}^n (X_i - \bar{X})^2  \right)
+\end{equation}
+
+The likelihood ratio statistic is then:
+
+\begin{equation}
+\Lambda = 
+\frac{\frac{1}{(\sigma\sqrt{2\pi})^n} 
+           \exp\left( -\frac{1}{2\sigma^2} \sum_{i=1}^n (X_i - \mu_0)^2  \right)}{\frac{1}{(\sigma\sqrt{2\pi})^n} 
+           \exp\left( -\frac{1}{2\sigma^2} \sum_{i=1}^n (X_i - \bar{X})^2  \right)}
+\end{equation}
+
+Canceling out common terms:
+
+\begin{equation}
+\Lambda = 
+\frac{\exp\left( -\frac{1}{2\sigma^2} \sum_{i=1}^n (X_i - \mu_0)^2  \right)}{
+        \exp\left( -\frac{1}{2\sigma^2} \sum_{i=1}^n (X_i - \bar{X})^2  \right)}
+\end{equation}
+
+Taking logs:
+
+\begin{equation}
+\begin{split}
+\log \Lambda =& 
+\left( -\frac{1}{2\sigma^2} \sum_{i=1}^n (X_i - \mu_0)^2  \right)-\left( -\frac{1}{2\sigma^2} \sum_{i=1}^n (X_i - \bar{X})^2  \right)\\
+=& -\frac{1}{2\sigma^2} \left( \sum_{i=1}^n (X_i - \mu_0)^2  -  \sum_{i=1}^n (X_i - \bar{X})^2 \right)\\
+\end{split}
+\end{equation}
+
+Now, note that 
+
+\begin{equation}
+\sum_{i=1}^n (X_i -\mu_0)^2 = \sum_{i=1}^n (X_i - \bar{X})^2 + n(\bar{X} - \mu_0)^2 
+\end{equation}
+
+This means that 
+
+\begin{equation}
+\sum_{i=1}^n (X_i -\mu_0)^2 - \sum_{i=1}^n (X_i - \bar{X})^2 = n(\bar{X} - \mu_0)^2 
+\end{equation}
+
+
+So, we can write $\Lambda$ as:
+
+\begin{equation}
+\Lambda = -\frac{1}{2\sigma^2}   n(\bar{X} - \mu_0)^2 
+\end{equation}
+
+Rearranging terms:
+
+\begin{equation}
+-2 \Lambda =    \frac{n(\bar{X} - \mu_0)^2 }{\sigma^2}
+\end{equation}
+
+or maybe even more transparently:
+
+\begin{equation}
+-2 \Lambda =    \frac{(\bar{X} - \mu_0)^2 }{\frac{\sigma^2}{n}}
+\end{equation}
+
+This should remind you of the Wald statistic we saw earlier. Basically, all this
+is saying is that the test rejects the null when $\mid \bar{X} - \mu_0\mid$ is
+large.
+
+More generally, we will define the \textbf{likelihood ratio test statistic} as follows. Here, $L(\theta)$ refers to the likelihood given some value of $\theta$, and 
 $\ell(\theta)$ refers to the log likelihood.
 
 \begin{equation}
 \begin{split}
-\lambda =& 2\times \log (L(\theta_1)/L(\theta_0)) \\
-=& 2\times \{\ell (\theta_1)-\ell(\theta_0)\}\\
-\lambda =& 2 \times \{\ell(\theta_1) - \ell(\theta_0)\}
+L =& -2\times \log (L(\theta_0)/L(\theta_1)) \\
+\log L=& -2\times \{\ell (\theta_0)-\ell(\theta_1)\}\\
+\log L =& -2 \times \{\ell(\theta_0) - \ell(\theta_1)\}
 \end{split}
 \end{equation}
 
-where $\theta_1$ and $\theta_0$ are the estimates of $\theta$ under the alternative and null hypotheses, respectively. The likelihood ratio test rejects $H_0$ if $\lambda$ is sufficiently large. As the sample size approaches infinity,
+where $\theta_1$ and $\theta_0$ are the estimates of $\theta$ under the alternative and null hypotheses, respectively. The likelihood ratio test rejects $H_0$ if $\log L$ is sufficiently large. As the sample size approaches infinity:
 
 \begin{equation}
-\lambda = \chi_r^2
+\log L \rightarrow \chi_r^2  \hbox{ as }  n \rightarrow \infty
 \end{equation}
 
-where r is called degrees of freedom and is the difference in the number of parameters estimated under $H_1$ and $H_0$. This is called Wilks' theorem. The proof of Wilks' theorem is fairly involved but you can find it on the internet if you are interested.
+where $r$ is called the degrees of freedom and is the difference in the number of parameters estimated under $H_1$ and $H_0$. This is called Wilks' theorem. The proof of Wilks' theorem is fairly involved but you can find it on the internet if you are interested,
+or in Lehmann's \textit{Testing Statistical Hypotheses}.
 
 Note that sometimes you will see the form:
 
 \begin{equation}
-\lambda = -2 \{\ell(\theta_0) - \ell(\theta_1)\}
+\log L = 2 \{\ell(\theta_1) - \ell(\theta_0)\}
 \end{equation}
 
-It should be clear that both statements are saying the same thing; in the second case, we are just subtracting the alternative hypothesis log likelihood from the null hypothesis log likelihood.
+It should be clear that both statements are saying the same thing; in the second case, we are just subtracting the null hypothesis log likelihood from the alternative hypothesis log likelihood.
 
 A practical example will make the usage of this test clear.
 Let's just simulate a linear model:
