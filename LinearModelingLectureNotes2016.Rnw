@@ -2696,7 +2696,7 @@ or maybe even more transparently:
 \end{equation}
 
 This should remind you of the Wald statistic we saw earlier. Basically, all this
-is saying is that the test rejects the null when $\mid \bar{X} - \mu_0\mid$ is
+is saying is that we reject the null when $\mid \bar{X} - \mu_0\mid$ is
 large.
 
 More generally, we will define the \textbf{likelihood ratio test statistic} as follows. Here, $L(\theta)$ refers to the likelihood given some value of $\theta$, and 
@@ -2716,7 +2716,7 @@ where $\theta_1$ and $\theta_0$ are the estimates of $\theta$ under the alternat
 \log L \rightarrow \chi_r^2  \hbox{ as }  n \rightarrow \infty
 \end{equation}
 
-where $r$ is called the degrees of freedom and is the difference in the number of parameters estimated under $H_1$ and $H_0$. This is called Wilks' theorem. The proof of Wilks' theorem is fairly involved but you can find it on the internet if you are interested,
+where $r$ is called the degrees of freedom and is the difference in the number of parameters under $H_1$ and $H_0$. This is called Wilks' theorem. The proof of Wilks' theorem is fairly involved but you can find it on the internet if you are interested,
 or in Lehmann's \textit{Testing Statistical Hypotheses}.
 
 Note that sometimes you will see the form:
@@ -2881,46 +2881,15 @@ The definition of $VIF_j$ for a predictor j is:
 VIF_j = \frac{1}{1-R_j^2}
 \end{equation}
 
-where $R_j^2$ is called the coefficient of determination, and quantifies goodness of fit of the model. We define this next.
-
-Recall that the residual sum of squares\marginnote{Note that I am using $e$ here, not $\epsilon$.  $e$ is computed from the estimated $\hat\beta$.} is 
-
-\begin{equation}
-e^T e = (Y - X\hat \beta)^T (Y - X\hat \beta) = \hat S
-\end{equation}
-
-We can compare this sum of squares with the minimal model, which has $E[Y] = \mu$. In this model, the design matrix is an $n\times 1$ design matrix, so $X^TX=n$:
-
-<<>>=
-X<-matrix(rep(1,10),ncol=1)
-##
-t(X)%*%X
-@
-
-and $X^T Y = \sum y_i$. And $\hat \beta=\hat \mu = \bar{y}$. So, for this simple model, the sum of squares $\hat S_0$ is:
-
-\begin{equation}
-\hat S_0 = Y^T Y - n \bar{y}^2
-\end{equation}
-
-$R^2$ is defined as follows:
-
-\begin{equation}
-R^2 = \frac{\hat S_0 - \hat S}{\hat S_0} = \frac{\hat \beta X^T Y - n\bar{y}^2}{Y^TY - n\bar{y}^2}
-\end{equation}
-
-The interpretation of $R^2$ is 
-that it represents
-the proportion of variance explained by the model. Note that $R^2$ always increases if predictors are added, so an adjustment is made, called adjusted $R^2$:
-
-\begin{equation}
-R_{Adj}^2= 1-\frac{( (Y - X\hat \beta)^T (Y - X\hat \beta))/(n-p)}{(Y^TY - n\bar{y}^2)/(n-1)}
-\end{equation}
-
+where $R_j^2$ is called the coefficient of determination for predictor j. 
+It is obtained by regressing the j-th explanatory variable against all the 
+other explanatory variables.
+If a predictor j is uncorrelated with all other predictors, then $VIF_j=1$, and 
+if it is highly correlated with (some of) other predictors, the VIF will be high.
 %to-do
 %I will discuss orthogonality of the design matrix later in the course in the context of design of experiments.
 
-Now for a practical example. 
+Here is a practical example. 
 Consider word length and syllable length as predictors in the Hindi data:
 
 <<>>=
@@ -2958,7 +2927,10 @@ The normality assumption is necessary for hypothesis testing, but one other  con
 <<normalityresiduals,fig.width=6>>=
 op<-par(mfrow=c(1,2),pty="s")
 x<-1:100
-y1<- 10 + 2*x+rchisq(100,df=1)
+## residuals with mean zero, but non-normal:
+reschisq<-rchisq(100,df=1)
+reschisq_c<-reschisq-mean(reschisq)
+y1<- 10 + 2*x+reschisq_c
 qqPlot(residuals(lm(y1~x)))
 y2<- 10 + 2*x+rnorm(100,sd=10)
 qqPlot(residuals(lm(y2~x)))
@@ -2973,7 +2945,8 @@ x<-1:n
 store_y1_results<-rep(NA,nsim)
 store_y2_results<-rep(NA,nsim)
 for(i in 1:nsim){
-  e<-rchisq(n,df=1)
+  reschisq<-rchisq(100,df=1)
+  e<-reschisq-mean(reschisq)
   e<-scale(e,scale=F)
   y1<- 10 + 0.01*x + e
   m1<-lm(y1~x)
@@ -3279,7 +3252,7 @@ If we exponentiate each side, we get:
 
 So now we just solve for p, and get (check this):
 
-\begin{equation}
+\begin{equation} \label{problogisticregression}
 p = \frac{\exp( \beta_0 + \beta_1 \hbox{dose})}{1+\exp( \beta_0 + \beta_1 \hbox{dose})}
 \end{equation}
 
@@ -3320,14 +3293,30 @@ We can also obtain the variance-covariance matrix of the fitted coefficients:
 (var.log.odds<-t(x)%*%vcovmat%*%x)
 @
 
-And using a normal approximation, based on the asymptotic properties discussed in section~\ref{asymptotic}, we can compute the confidence interval for the probability of death given dose 1.7552:
+And using a normal approximation, based on the asymptotic properties discussed in section~\ref{asymptotic}, we can compute the confidence interval for the %probability
+log odds
+of death given dose 1.7552:
 
 <<>>=
 ##lower
-log.odds-1.96*sqrt(var.log.odds)
+(lower<-log.odds-1.96*sqrt(var.log.odds))
 ##upper
-log.odds+1.96*sqrt(var.log.odds)
+(upper<-log.odds+1.96*sqrt(var.log.odds))
 @
+
+The lower and upper confidence interval bounds on the 
+probability scale can be computed by 
+using equation~\ref{problogisticregression}.
+
+<<>>=
+(mean_prob<-exp(log.odds)/(1+exp(log.odds)))
+(lower_prob<-exp(lower)/(1+exp(lower)))
+(upper_prob<-exp(upper)/(1+exp(upper)))
+@
+
+So for dose 1.7552, the probability of death is \Sexpr{round(mean_prob,2)},
+with 95\% confidence intervals \Sexpr{round(lower_prob,2)} and 
+\Sexpr{round(upper_prob,2)}.
 
 Note that one should not try to predict outside the range of the design matrix. For example, in the beetle data, the dose ranges from 1.69 to 1.88. We should not try to compute probabilities for dose 2.5, say, since we have no knowledge about whether the relationship remains unchanged beyond the upper bound of our design matrix.
 
@@ -5169,6 +5158,43 @@ I will add notes here later, but for next week, please read the ArXiv preprint b
 \bibliographystyle{plain}
 \bibliography{/Users/shravanvasishth/Dropbox/Bibliography/bibcleaned}
 \end{document}
+
+to-do: add discussion of correlation somewhere:
+
+Recall that $R^2$ is defined as below.
+The residual sum of squares is 
+
+\begin{equation*}
+e^T e = (Y - X\hat \beta)^T (Y - X\hat \beta) = \hat S
+\end{equation*}
+
+We can compare this sum of squares of a model with the minimal model, which has $E[Y] = \mu$. In this model, the design matrix is an $n\times 1$ design matrix, so $X^TX=n$:
+
+<<>>=
+X<-matrix(rep(1,10),ncol=1)
+##
+t(X)%*%X
+@
+
+and $X^T Y = \sum y_i$. And $\hat \beta=\hat \mu = \bar{y}$. So, for this simple model, the sum of squares $\hat S_0$ is:
+
+\begin{equation*}
+\hat S_0 = Y^T Y - n \bar{y}^2
+\end{equation*}
+
+$R^2$ is defined as follows:
+
+\begin{equation*}
+R^2 = \frac{\hat S_0 - \hat S}{\hat S_0} = \frac{\hat \beta X^T Y - n\bar{y}^2}{Y^TY - n\bar{y}^2}
+\end{equation*}
+
+The interpretation of $R^2$ is 
+that it represents
+the proportion of variance explained by the model. Note that $R^2$ always increases if predictors are added, so an adjustment is made, called adjusted $R^2$:
+
+\begin{equation*}
+R_{Adj}^2= 1-\frac{( (Y - X\hat \beta)^T (Y - X\hat \beta))/(n-p)}{(Y^TY - n\bar{y}^2)/(n-1)}
+\end{equation*}
 
 
 
