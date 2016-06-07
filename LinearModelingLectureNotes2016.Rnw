@@ -3215,7 +3215,7 @@ with(beetle,plot(scale(dose,scale=FALSE),
 abline(coef(fm))
 @
 
-What's the interpretation of the coefficients?
+What's the interpretation of the coefficients? Does an increase in dose lead to an increase in proportion of dead beetles?
 
 Clearly the linear model is failing us here. This is the motivation for the generalized linear model. 
 
