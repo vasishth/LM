@@ -3215,9 +3215,9 @@ with(beetle,plot(scale(dose,scale=FALSE),
 abline(coef(fm))
 @
 
-What's the interpretation of the coefficients? Does an increase in dose lead to an increase in proportion of dead beetles?
+What's the interpretation of the coefficients? Does an increase in dose lead to an increase in proportion of dead beetles? What does an "increase in proportion of dead beetles" even mean?
 
-Clearly the linear model is failing us here. This is the motivation for the generalized linear model. 
+This number doesn't make much sense, so clearly the linear model is failing us here. This is the motivation for the generalized linear model.
 
 Instead of using the linear model, we model log odds instead of proportions as a function of dose.  Odds are defined as:
 
