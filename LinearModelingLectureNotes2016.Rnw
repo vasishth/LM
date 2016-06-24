@@ -3346,7 +3346,7 @@ We have considered linear models like
 E[Y_i] = \mu_i = x_i^T \beta \quad y_i \sim N(\mu_i,\sigma^2)
 \end{equation}
 
-GLMs allow us to stay within the linear modeling framework, even if the relationship betwen response and explanatory variable is not linear.
+GLMs allow us to stay within the linear modeling framework, even if the relationship between response and explanatory variable is not linear.
 
 There is a wider class of distributions beyond the two we have seen (normal, binomial), that are called the \textbf{exponential family of distributions}; the normal and binomial fall within this family.
 
@@ -3496,7 +3496,7 @@ The big thing about the canonical link is that is expresses $\theta_i$ as a line
 
 \subsection{Estimation of parameters}
 
-In linear models, we know how to estimate the $\beta$ parameters:
+In linear models, we know how to get an estimate of the estimator(s) $\beta$:
 
 \begin{equation}
 \hat \beta = (X^T X)^{-1} X^T Y
@@ -3602,7 +3602,7 @@ The basic idea here is that if the model fit is good, Deviance will have a $\chi
 So that is what we will use for assessing model fit.
 
 We will also use deviance for hypothesis testing.
-The difference in deviance (residual deviance) between two models also has a $\chi_2$ distribution (this should remind you of ANOVA), with dfs being $p-q$, where $q$ is the number of parameters in the first model, and $p$ the number of parameters in the second.
+The difference in deviance (residual deviance) between two models also has a $\chi^2$ distribution (this should remind you of ANOVA), with dfs being $p-q$, where $q$ is the number of parameters in the first model, and $p$ the number of parameters in the second.
 
 I discuss hypothesis testing first, then evaluating goodness of fit using deviance.
 
@@ -3728,9 +3728,9 @@ plot(dose.glm$fit,dose.glm$resid,xlab="Fitted values",
 
 \section{Linear mixed models}
 
-In linear modeling, we model the mean of a response $Y_1,\dots,Y_n$ as a function of a vector of predictors $x_1,\dots,x_n$. We assume that the $Y_i$ are conditionally independent given $\mathbf{x}, \mathbf{\beta}$. When $Y$'s are not marginally independent, we have $Cor(Y_1,Y_2)\neq 0$, or $P(Y_2\mid Y_1)\neq P(Y_2)$.
+In linear modeling, we model the mean of a response $Y_1,\dots,Y_n$ as a function of a vector of predictors $x_1,\dots,x_n$. We assume that the $Y_i$ are conditionally independent given $\mathbf{x}, \beta$. When $Y$'s are not marginally independent, we have $Cor(Y_1,Y_2)\neq 0$, or $P(Y_2\mid Y_1)\neq P(Y_2)$.
 
-Linear mixed models are useful for correlated data where $\mathbf{Y}\mid \mathbf{X}, \mathbf{\beta}$ are not independently distributed. 
+Linear mixed models are useful for correlated data where $\mathbf{Y}\mid \mathbf{X}, \beta$ are not independently distributed. 
 
 \subsection{Informal presentation of LMMs}
 
@@ -4338,7 +4338,8 @@ text(.5,2.6,"a=6,b=6")
 \caption{Examples of the beta distribution with different parameter values.}\label{fig:betaeg}
 \end{marginfigure}
 
-As the figure shows, as the a,b values are increased, the shape begins to resemble the normal distribution. 
+As the figure shows, as the a,b values are increased, the shape begins to resemble the normal distribution (although
+of course the x-axis is bounded here between 0 and 1). 
 
 If we don't have much prior information, we could use a=b=2; this gives us a uniform prior; this is called an uninformative prior or non-informative prior (although having no prior knowledge is, strictly speaking, not uninformative). If we have a lot of prior knowledge and/or a strong belief that p has a particular value, we can use a larger a,b to reflect our greater certainty about the parameter. Notice that the larger our parameters a and b, the smaller the spread of the distribution; this makes sense because a larger sample size (a greater number of successes a, and a greater number of failures b) will lead to more precise estimates.
 
@@ -4401,7 +4402,7 @@ plot(function(x)
   dbeta(x,shape1=46,shape2=54),0,1,
               ylab="",xlab="X")
 @
-\caption{Using the beta distribution to represent a binomial.}\label{fig:betaforbinom}
+\caption{Using the beta distribution to represent our belief about the parameter of the binomial distribution.}\label{fig:betaforbinom}
 \end{marginfigure}
 
 As an exercise, you should try to 
@@ -4558,6 +4559,7 @@ liks.priors<-likelihoods * priors
 sum.lik.priors<-sum(liks.priors)
 
 posteriors<- liks.priors/sum.lik.priors
+posteriors
 @
 
 We have been using discrete prior distributions so far. We might want to use a continuous prior distribution if we have prior knowledge that, say, the true value lies between 0.2 and 0.6, with mean 0.4. If our prior should have mean 0.4 and sd 0.1, we can figure out what the corresponding parameters of the beta distribution should be. (Look up the mean and variance of the beta distribution, and solve for the parameters.)
@@ -4687,7 +4689,7 @@ plot.it(m=0.5,s=0.4,k=15,n=20)
 
 Here is another exercise to help you solidify your understanding of the above concepts. It is taken from the Copenhagen course of 2012 that I mentioned earlier. I quote it verbatim.
 
-``The French mathematician Pierre-Simon Laplace (1749-1827) was the first person to show definitively that the proportion of female births in the French population was less then $0.5$, in the late 18th century, using a Bayesian analysis based on a uniform prior distribution\cite{Gelman}). Suppose you were doing a similar analysis but you had more definite prior beliefs about the ratio of male to female births. In particular, if $\theta$ represents the proportion of female births in a given population, you are willing to place a Beta(100,100) prior distribution on $\theta$.
+``The French mathematician Pierre-Simon Laplace (1749-1827) was the first person to show definitively that the proportion of female births in the French population was less then $0.5$, in the late 18th century, using a Bayesian analysis based on a uniform prior distribution). Suppose you were doing a similar analysis but you had more definite prior beliefs about the ratio of male to female births. In particular, if $\theta$ represents the proportion of female births in a given population, you are willing to place a Beta(100,100) prior distribution on $\theta$.
 
 \begin{enumerate}
 \item
@@ -5150,8 +5152,7 @@ This ends our introduction to Bayesian data analysis. We turn next to our main t
 
 \section{Fitting Linear Models and Linear Mixed Models in a Bayesian setting}
 
-I will add notes here later, but for next week, please read the ArXiv preprint by Sorensen and Vasishth 
-\cite{SorensenVasishthTutorial}.
+I will add notes here later, but for next week, please read the ArXiv preprint by Sorensen et al\cite{SorensenVasishthTutorial}.
 
 
 %% to-do remove chapter header
