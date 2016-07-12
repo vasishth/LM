@@ -2797,18 +2797,45 @@ Define the \textbf{deviance} as:
 \label{deviance}
 
 \begin{equation}
-\begin{split}
+\begin{split} \label{eq:deviance}
 D =& \frac{1}{\sigma^2} (Y - X\hat \beta)^T (Y - X\hat \beta)\\
 =& \frac{1}{\sigma^2}  (Y^T - \hat \beta^TX^T)(Y - X\hat \beta)\\
-=& \frac{1}{\sigma^2} (Y^T Y - Y^TX\hat \beta - \hat\beta^TX^T Y + \beta^TX^T  X\hat \beta)\\
-=& \frac{1}{\sigma^2} (Y^T Y - \hat\beta^TX^T Y)\\
+=& \frac{1}{\sigma^2} (Y^T Y - Y^TX\hat \beta - \hat\beta^TX^T Y + \hat\beta^TX^T  X\hat \beta)\\
+%=& \frac{1}{\sigma^2} (Y^T Y - \hat\beta^TX^T Y)\\
 \end{split}
 \end{equation}
 
-Notice that $- Y^TX\hat \beta + \beta^TX^T  X\hat \beta = 0$; they are scalar $1\times 1$.
+Now, recall that $\hat \beta = (X^T X)^{-1} X^T Y$. Premultiplying both sides with $(X^T X)$, we get
 
-Assume that we have data of size n.
-Now suppose we have a null hypothesis $H_0: \beta=\beta_0$ and an alternative hypothesis $H_1: \beta=\beta_{1}$. Let the null hypothesis have q parameters, and the alternative p, where $q<p<n$.
+$$(X^T X)\hat \beta =  X^T Y$$
+
+It follows that we can rewrite the last line in equation~\ref{eq:deviance} as follows: We can replace $(X^T X)\hat \beta$ with 
+$X^T Y$.
+
+\begin{equation}
+\begin{split}
+D =& \frac{1}{\sigma^2} (Y^T Y - Y^TX\hat \beta - \hat\beta^TX^T Y + \hat\beta^T \underline{X^T  X\hat \beta})\\
+=& \frac{1}{\sigma^2} (Y^T Y - Y^TX\hat \beta - \hat\beta^TX^T Y + \hat\beta^T \underline{X^T Y})\\
+=& \frac{1}{\sigma^2} (Y^T Y - Y^TX\hat \beta) \\
+\end{split}
+\end{equation}
+
+Notice that $Y^TX\hat \beta$ is a scalar ($1\times 1$) and is identical to  $\beta^TX^T Y$ (check this), so we could write:
+
+<<echo=FALSE>>=
+y<-rnorm(10)
+X<-matrix(c(rep(1,10),
+            rnorm(10)),ncol=2)
+b<-solve(t(X) %*% X)%*% t(X)%*% y
+#t(y)%*% X %*% b
+#t(b)%*%t(X)%*%y
+@
+
+
+$$D= \frac{1}{\sigma^2} (Y^T Y - \hat \beta^T X^T Y)$$
+
+Assume now that we have data of size n.
+Suppose we have a null hypothesis $H_0: \beta=\beta_0$ and an alternative hypothesis $H_1: \beta=\beta_{1}$. Let the null hypothesis have q parameters, and the alternative p, where $q<p<n$.
 Let $X_0$ be the design matrix for $H_0$, and $X_1$ the design matrix for $H_1$.
 Compute the deviances $D_0$ and $D_1$ for each hypothesis, and compute $\Delta D$:
 
@@ -3158,7 +3185,7 @@ We illustrate this using R. If we have non-normal residuals, we can use the boxc
 
 <<boxcox1,fig.width=6>>=
 ## generate some non-normally distributed data:
-data<-rchisq(100,df=1)
+data<-100+rexp(1000,rate=1/1000)
 m<-lm(data~1)  
 qqPlot(residuals(m))
 @
@@ -3169,6 +3196,10 @@ library(MASS)
 boxcox(m)
 
 m<-lm(log(data)~1)  
+@
+
+<<boxcox2a,fig.width=6>>=
+qqPlot(residuals(m))
 @
 
 %% to-do
