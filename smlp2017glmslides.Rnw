@@ -1,0 +1,70 @@
+\documentclass[red]{beamer}
+
+\usepackage{mathtools}
+\makeatletter
+\newcommand{\explain}[2]{\underset{\mathclap{\overset{\uparrow}{#2}}}{#1}}
+\newcommand{\explainup}[2]{\overset{\mathclap{\underset{\downarrow}{#2}}}{#1}}
+\makeatother
+
+
+\usetheme{Antibes}
+\usecolortheme{lily}
+
+%\usepackage{gb4e}
+
+%\usepackage{color}
+
+\usepackage{fancyvrb}
+\usepackage{xcolor}
+
+%\fvset{frame=single,framesep=1mm,fontfamily=courier,fontsize=\scriptsize,numbers=left,framerule=.3mm,numbersep=1mm,commandchars=\\\{\}}
+
+
+
+\usepackage[english]{babel}
+%\usepackage[latin1]{inputenc}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{epstopdf}
+
+\usepackage{mathptmx}
+\usepackage{amsthm}
+
+\usepackage{esint}
+
+\setbeamercovered{transparent}
+
+
+\title[Generalized linear (mixed) models]{Generalized linear (mixed) models}
+\author{Shravan Vasishth}
+\institute{Department of Linguistics\\
+University of Potsdam, Germany}
+
+\setbeamerfont{page number in head/foot}{size=\large}
+\setbeamertemplate{footline}[frame number]
+
+\begin{document}
+
+<<setup,include=FALSE,cache=FALSE>>=
+library(knitr)
+library(coda)
+
+# set global chunk options, put figures into folder
+options(replace.assign=TRUE,show.signif.stars=FALSE)
+opts_chunk$set(fig.path='figures/figure-', fig.align='center', fig.show='hold')
+options(replace.assign=TRUE,width=75)
+opts_chunk$set(dev='postscript')
+@
+
+\frame{\titlepage}
+
+
+\begin{frame}[fragile]\frametitle{}
+
+\end{frame}
+
+
+
+\end{document}
+
