@@ -9,7 +9,7 @@ The source code for the lecture notes is in the .Rnw file, the compiled pdf is a
 
 How to download: 
 
-On osf, just download the files individually or the whole directory.
+On osf, just download the files or directory individually by highlighting the relevant file/directory and clicking download.
 
 On github, either click on download zip over on the top right, or on your command line, type in your directory of choice:
 
