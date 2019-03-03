@@ -1,9 +1,6 @@
 # Linear modeling lecture notes (Shravan Vasishth)
 
-This repository contains lecture notes on the theory of linear models. These notes are designed for the 
-MSc in Cognitive Systems offered jointly by Computer Science and Linguistics at the University of Potsdam, Germany.
-
-For the MSc program, see http://www.ling.uni-potsdam.de/en/students/msc-cogsys/
+This repository contains lecture notes on the theory of linear models. 
 
 The source code for the lecture notes is in the .Rnw file, the compiled pdf is also provided, as well as R code. You can run the code while reading the notes. Data are located in the directory datacode.
 
