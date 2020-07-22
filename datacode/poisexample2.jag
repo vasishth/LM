@@ -1,0 +1,12 @@
+
+model
+   {
+for(i in 1:4){
+  y[i] ~ dpois(theta)
+}
+  y[5] ~ dpois(2*theta)
+    
+  ##prior
+  ## gamma params derived from given info:  
+  theta ~ dgamma(10000/225,100/225)
+}
