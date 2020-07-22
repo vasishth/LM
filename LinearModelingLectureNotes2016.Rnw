@@ -1650,12 +1650,8 @@ As an example, consider the eyetracking data I released earlier. For now we will
 @
 
 <<echo=FALSE>>=
-hindi10<-read.table("datacode/hindi10a.txt",header=T)
-
-#colnames(hindi10)
-#summary(hindi10$TFT)
+hindi10<-read.table("datacode/hindi10a.txt",header=TRUE)
 hindi10<-subset(hindi10,TFT>0)
-#summary(hindi10$TFT)
 @
 
 A histogram reveals the following distribution of reading times on the log scale. It's a slight stretch, but we start with the guess that this is roughly a normal distribution:
